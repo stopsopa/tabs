@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
+        <script src="jquery.tabs.v0.1.js"></script>
+        <link rel="stylesheet" href="jquery.tabs.v0.1.css">
+        <script>
+            (function (fn) {
+                (function call() {
+                    window.$ ? $(fn) : setTimeout(call, 100);
+                }())
+            }(function () {
+
+                $('[data-tabs]').on('tabs:change', function (ev) {
+                    ev.stopPropagation();
+                    console.log('tabs:change')
+                }).tabs({
+                    active: 1
+                });
+
+            }));
+        </script>
+    </head>
+    <body>
+        <div data-tabs>
+            <div data-buttons>
+                <span>tab 1</span><a href="javascript:;">tab 2</a>
+                <span class="active">tab 3</span>
+                <span>tab 4</span>
+            </div>
+            <div data-divs>
+                <div>Lorem ipsum div 1</div>
+                <div>Lorem ipsum div 2</div>
+                <div>Lorem ipsum div 3</div>
+                <div>
+                    <p>another tabs:</p>
+                    <div data-tabs>
+                        <div data-buttons>
+                            <span>tab 1</span>
+                            <a href="javascript:;">tab 2</a>
+                            <span class="active">tab 3</span>
+                            <span>tab 4</span>
+                        </div>
+                        <div data-divs>
+                            <div>Lorem ipsum div 1</div>
+                            <div>Lorem ipsum div 2</div>
+                            <div>Lorem ipsum div 3</div>
+                            <div>Lorem ipsum div 4</div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div data-tabs>
+            <div data-buttons>
+                <span>tab 1</span><a href="javascript:;">tab 2</a>
+                <span class="active">tab 3</span>
+                <span>tab 4</span>
+            </div>
+            <div data-divs>
+                <div>Lorem ipsum div 1</div>
+                <div>Lorem ipsum div 2</div>
+                <div>Lorem ipsum div 3</div>
+                <div>
+                    <p>another tabs:</p>
+
+
+                </div>
+            </div>
+        </div>
+        <hr>
+                    <div data-tabs>
+                        <div data-buttons>
+                            <span>tab 1</span>
+                            <a href="javascript:;">tab 2</a>
+                            <span class="active">tab 3</span>
+                            <span>tab 4</span>
+                        </div>
+                        <div data-divs>
+                            <div>Lorem ipsum div 1</div>
+                            <div>Lorem ipsum div 2</div>
+                            <div>Lorem ipsum div 3</div>
+                            <div>Lorem ipsum div 4</div>
+                        </div>
+                    </div>
+    </body>
+</html>
