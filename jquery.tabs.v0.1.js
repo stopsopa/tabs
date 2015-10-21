@@ -1,3 +1,13 @@
+/**
+ * @author Szymon Działowski
+ * @ver 0.1 - 2015-10-21
+ * @homepage https://github.com/stopsopa/tabs
+ * @demo http://httpd.pl/stopsopa.github.io/demos/jquery.tabs/demo.html
+ *
+ * Copyright (c) 2015 Szymon Działowski
+ * Released under the MIT license
+ * http://en.wikipedia.org/wiki/MIT_License
+ */
 ;(function ($, name) {
 
     function log(){try{window.console.log.apply(window.console,arguments);}catch(e){}};
@@ -29,7 +39,7 @@
             arg1 = Math.floor(arg1);
 
             if (isNaN(arg1))
-                return error("arg1 is NaN");
+                return error("arg1 is NaN, should be int");
 
             if (arg1 < 0)
                 return error("arg1 shouldn't be less then 0");
@@ -82,6 +92,7 @@
                         t = $(this),
                         i = t.index()
                     ;
+                    //log('event: '+ t.index() +' : '+oninit)
 
                     buttons.children()
                         .not(':eq('+i+')').removeClass('active').end()
@@ -93,7 +104,16 @@
                         .eq(i).addClass('active')
                     ;
 
-                    box.trigger(name+':change', [oninit]);
+                    var data = t.data(key);
+                    var first = !data;
+                    if (!data) {
+                        data = {
+                           first : true
+                        };
+                        t.data(key, data);
+                    }
+
+                    box.triggerHandler(name+':change', [i, t, divs.children().eq(i), first]);
                 };
 
                 fn.buttons  = buttons;
@@ -101,9 +121,9 @@
                 fn.box      = box;
 
                 return fn;
-            }(box, buttons, divs))
+            }(box, buttons, divs));
 
-            buttons.on('click', '> *', change)
+            buttons.on('click', '> *', change);
 
             if (opt.active) {
                 var trigger = buttons.find('> :eq('+opt.active+')');
@@ -118,12 +138,12 @@
                     trigger = buttons.children(':first');
             }
 
-            change.call(trigger, null, ['oninit']);
-
             box.data(key, {
                 widget  : name,
                 change  : change
             });
+
+            change.call(trigger, null, 'oninit');
         });
     };
 
