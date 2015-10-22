@@ -20,7 +20,7 @@ Simple and very easy to user tab widget for jQuery
     
 ```html
         <link rel="stylesheet" href="jquery.tabs.v0.1.css">
-        <script src="jquery.tabs.v0.1.js"></script>  
+        <script src="jquery.tabs.v0.1.js"> </script>  
 ```  
     
     
