@@ -154,6 +154,7 @@ There is also available special selector to find all initialized tab components 
             //            javascript inside tab that can't be done 
             //            if content is display: none;
         })
+        .tabs()
 ```
 
 
