@@ -2,7 +2,7 @@
  * @author Szymon Działowski
  * @ver 0.1 - 2015-10-21
  * @homepage https://github.com/stopsopa/tabs
- * @demo http://httpd.pl/stopsopa.github.io/demos/jquery.tabs/demo.html
+ * @demo http://stopsopa.github.io/submod/tabs/demo/demo.html
  *
  * Copyright (c) 2015 Szymon Działowski
  * Released under the MIT license
