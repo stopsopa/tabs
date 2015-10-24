@@ -130,6 +130,27 @@ There is also available special selector to find all initialized tab components 
     }
 ```
 
+# events
+
+
+```javascript
+    $('[data-tabs]')
+        .on('tabs:change', function (e, i, tab, div, isFirst) {
+            // better define .on() events before call .tabs(),
+            // because .tabs() will have no opportunity to call this event during initialization
+            
+            if (isFirst) { // isFirst -> is this a first click on tab?,
+                div.find('.editor, .syntax').aceedit(); // initialize javascripts on content of tab
+            }
+            
+            // e        - native event object
+            // i        - index of current tab
+            // tab      - jQuery element representing clicked tab
+            // div      - jQuery element representing div with tab content
+            // isFirst  - flag to determine if this is first show of tab content, usially useful for initialize javascript inside tab that can't be done if content is display: none;
+        })
+```
+
 
 
 
