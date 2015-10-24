@@ -49,8 +49,6 @@
         $(function () {
 
             var first = $('[data-tabs]:first').on('tabs:change', function (e, i, tab, div, isFirst) {
-                log('tabs:change')
-                log(arguments)
                 if (isFirst) {
                     div.find('.editor, .syntax').aceedit();
                     div.find('[data-tabs]').tabs();
