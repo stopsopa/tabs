@@ -1,0 +1,23 @@
+{
+  "name": "stopsopa.tabs",
+  "version": "1.0.0",
+  "description": "Another js tab component",
+  "main": "jquery.tabs.v0.1.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:stopsopa/tabs.git"
+  },
+  "keywords": [
+    "jquery",
+    "tabs"
+  ],
+  "author": "Szymon Działowski <grytysek@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stopsopa/tabs/issues"
+  },
+  "homepage": "https://github.com/stopsopa/tabs#readme"
+}
