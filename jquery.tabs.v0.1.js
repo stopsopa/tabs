@@ -28,25 +28,33 @@
             active: undefined // 0 based, see also method $(...).tabs('active', int-zero-based)
         };
 
-        var key     = '_' + name;
+        var
+            key         = '_' + name,
+            selector    = ':'+name
+        ;
+
+
 
         var tools = {
-            destroy: function (i, div, method, arg1) {
+            destroy: function (i, div, arg1) {
                 var t = $(div);
 
-                if (!t.is(':'+name))
-                    return error("Element "+i+" is not :"+name);
+                if (!t.is(selector))
+                    return error("Element "+i+" is not "+selector);
 
                 var opt = t.data(key);
+
                 t.removeData(key);
 
-                t.find('[data-buttons]:first').off('click', '> *', opt.change);
+                t.find('[data-buttons]:first')
+                    .off('click', '> *', opt.change)
+                    .find('> *').removeData(key)
+                ;
             },
             /**
              * Zero indexed
              */
-            active: function (i, div, method, arg1) {
-
+            active: function (i, div, arg1) {
                 arg1 = Math.floor(arg1);
 
                 if (isNaN(arg1))
@@ -55,34 +63,37 @@
                 if (arg1 < 0)
                     return error("arg1 shouldn't be less then 0");
 
-                var t = $(div);
+                var t = $(this);
 
-                if (!t.is(':'+name))
-                    return error("Element "+i+" is not :"+name);
+                if (!t.is(selector))
+                    return error("Element "+i+" is not "+selector);
 
                 var opt = t.data(key);
 
-                opt.change.apply(opt.change.buttons.find('> :eq('+arg1+')'));
+                var tab = opt.change.buttons.find('> :eq('+arg1+')');
+
+                if (!tab.length)
+                    return error("Tab index "+arg1+" doesn't exist");
+
+                opt.change.apply(tab);
             }
         };
 
         $.fn[name] = function (arg1) {
 
-            var a = Array.prototype.slice.call(arguments, 0);
+            var a = Array.prototype.slice.call(arguments, 1);
 
             if (typeof arg1 === 'string') {
 
                 if (!tools[arg1])
                     throw "Method "+arg1+" is not defined";
 
-                return $(this).each(function (i) {
+                return $(this).each(function (i, el) {
 
-                    if (!$(this).is(':'+name))
-                        return error("Element "+i+" is not :"+name);
+                    if (!$(this).is(selector))
+                        return error("Element "+i+" is not "+selector);
 
-                    var b = Array.prototype.slice.call(arguments, 0);
-
-                    tools[arg1].apply(this, b.concat(a));
+                    tools[arg1].apply(this, [i, el].concat(a));
                 });
             }
 
@@ -91,7 +102,7 @@
             return $(this).each(function (i) {
                 var box     = $(this);
 
-                if (box.is(':'+name))
+                if (box.is(selector))
                     return error("Element "+i+" is already a '"+name+"' widget");
 
                 var buttons = box.find('[data-buttons]:first');
@@ -102,8 +113,7 @@
                         var
                             t = $(this),
                             i = t.index()
-                            ;
-                        //log('event: '+ t.index() +' : '+oninit)
+                        ;
 
                         buttons.children()
                             .not(':eq('+i+')').removeClass('active').end()
@@ -118,10 +128,9 @@
                         var data = t.data(key);
                         var first = !data;
                         if (!data) {
-                            data = {
+                            t.data(key, {
                                 first : true
-                            };
-                            t.data(key, data);
+                            });
                         }
 
                         box.triggerHandler(name+':change', [i, t, divs.children().eq(i), first]);
