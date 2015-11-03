@@ -13,11 +13,9 @@ Simple and very easy to user tab widget for jQuery
 
 ## Npm instalation 
 
-<p align="center">
-  <a href="https://www.npmjs.com/package/stopsopa.tabs">
-    <img width="60" src="https://www.npmjs.com/static/images/npm-logo.svg">
-  </a>
-</p>
+<a href="https://www.npmjs.com/package/stopsopa.tabs">
+<img width="60" src="https://www.npmjs.com/static/images/npm-logo.svg">
+</a>
 
 ```
     npm install stopsopa/tabs
