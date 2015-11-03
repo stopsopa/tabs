@@ -11,23 +11,30 @@ Simple and very easy to user tab widget for jQuery
 
 ***
 
+## Npm instalation 
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/stopsopa.tabs">
+    <img width="60" src="https://www.npmjs.com/static/images/npm-logo.svg">
+  </a>
+</p>
+
+```
+    npm install stopsopa/tabs
+```
+
 ## Example
 
 
 ### include files
 
-
-    
 ```html
         <link rel="stylesheet" href="jquery.tabs.v0.1.css">
         <script src="jquery.tabs.v0.1.js"> </script>  
-```  
-    
-    
+```    
+ 
 
 ### html
-
-
 
 ```html
     <div data-tabs>
@@ -48,16 +55,15 @@ Simple and very easy to user tab widget for jQuery
             ...
         </div>
     </div>  
-```  
-    
+```    
+ 
 
 ### javascript
 
-
 ```javascript
     $('[data-tabs]').tabs();        
-```
-
+```  
+ 
 
 ## Api
 
@@ -67,7 +73,8 @@ Initialize and select specific tab on start:
     $('[data-tabs]').tabs({
         active: 2 // make active thisr tab on start (default: 0) 
     });
-```
+```   
+ 
 
 you can also check tab as a selected on start in html by adding 'active' class in one of two places:
 
@@ -91,47 +98,48 @@ you can also check tab as a selected on start in html by adding 'active' class i
             ...
         </div>
     </div>  
-```
+```  
 
 (activating by api has higher priority then in html and
-adding class 'active' in [data-buttons] has higher priority then adding in section [data-divs])
-
-
+adding class 'active' in [data-buttons] has higher priority then adding in section [data-divs])  
+ 
+  
+ 
 
 Change tab programmatically: 
 
 ```javascript
     $('[data-tabs]').tabs('active', 2); // active third tab
-```
+```  
+ 
 
 Destroy component - unbind all methods and clean up all context, (dom nodes stay as is),
 after that you can initialize widget on the same dom element again.
 
 ```javascript
     $('[data-tabs]').tabs('destroy');
-```
+```  
+ 
 
 There is also available special selector to find all initialized tab components ... :
 
 
 ```javascript
     $(':tabs').tabs('active', 1) // active second tab for all tab components
-```
-
+```  
+ 
 
 ... or to check if dom element is already initialized as a tab component:
-
-
 
 ```javascript
     var element = $('... some selector ...');
     if (element.is(':tabs')) {
         // do stuff
     }
-```
+```  
+ 
 
 # events
-
 
 ```javascript
     $('[data-tabs]')
@@ -155,12 +163,10 @@ There is also available special selector to find all initialized tab components 
             //            if content is display: none;
         })
         .tabs()
-```
-
-
-
-
-
+```  
+ 
+  
+ 
 
 ### License
 
