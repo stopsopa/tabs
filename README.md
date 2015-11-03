@@ -69,7 +69,7 @@ Initialize and select specific tab on start:
 
 ```javascript
     $('[data-tabs]').tabs({
-        active: 2 // make active thisr tab on start (default: 0) 
+        active: 2 // make active this tab on start (default: 0) 
     });
 ```   
  
