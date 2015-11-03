@@ -18,7 +18,7 @@ Simple and very easy to user tab widget for jQuery
 </a>
 
 ```
-    npm install stopsopa/tabs
+    npm install stopsopa.tabs
 ```
 
 ## Example
