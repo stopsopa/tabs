@@ -1,3 +1,6 @@
+# DEPRECATED
+Created in 2015
+
 # jquery.tabs
 
 Simple and very easy to user tab widget for jQuery
