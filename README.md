@@ -48,7 +48,7 @@ Simple and very easy to user tab widget for jQuery
             <a href="javascript:;">tab 4</a>
             ...
         </div>
-        <div data-divs>
+        <div data-tabs>
             <div>
                 content for tab 1
             </div>
@@ -91,7 +91,7 @@ you can also check tab as a selected on start in html by adding 'active' class i
             <a href="javascript:;">tab 4</a>
             ...
         </div>
-        <div data-divs>
+        <div data-tabs>
             <div>
                 content for tab 1
             </div>
@@ -104,7 +104,7 @@ you can also check tab as a selected on start in html by adding 'active' class i
 ```  
 
 (activating by api has higher priority then in html and
-adding class 'active' in [data-buttons] has higher priority then adding in section [data-divs])  
+adding class 'active' in [data-buttons] has higher priority then adding in section [data-tabs])  
  
   
  

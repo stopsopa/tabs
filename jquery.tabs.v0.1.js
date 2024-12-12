@@ -106,7 +106,7 @@
                     return error("Element "+i+" is already a '"+name+"' widget");
 
                 var buttons = box.find('[data-buttons]:first');
-                var divs    = box.find('[data-divs]:first');
+                var divs    = box.find('[data-tabs]:first');
 
                 var change = (function (box, buttons, divs) {
                     var fn = function (ev, oninit) {
