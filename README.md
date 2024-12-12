@@ -10,7 +10,7 @@ Simple and very easy to user tab widget for jQuery
 
 ## Demo
 
-  [Demo](http://stopsopa.github.io/submod/tabs/demo/demo.html)
+  [Demo](https://stopsopa.github.io/tabs/demo/vanilla.html)
 
 ***
 
