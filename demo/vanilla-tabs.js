@@ -1,6 +1,10 @@
 const log = console.log;
 
 const vanilaTabs = (function () {
+  const dataidkey = "data-vanilla-tab-id";
+
+  let i = 0;
+
   const warn = (function () {
     try {
       return (...args) => console.warn("vanilla-tabs:", ...args);
@@ -22,10 +26,34 @@ const vanilaTabs = (function () {
 
   let bound = false;
   return {
+    getNewId: function () {
+      i += 1;
+
+      return `vanilla-tabs-${i}`;
+    },
+    produceId: function (parent) {
+      if (!isNode(parent)) {
+        warn(`parent argument is not valid DOM element`, parent);
+
+        return this;
+      }
+
+      let id = parent.getAttribute(dataidkey);
+
+      if (typeof id !== "string") {
+        parent.setAttribute(dataidkey, (id = this.getNewId()));
+      }
+
+      return id;
+    },
     active: function () {
-      Array.from(
-        document.querySelectorAll("[data-vanila-tabs] > [data-buttons]")
-      )
+      Array.from(document.querySelectorAll("[data-vanila-tabs]"))
+
+        .map((parent) => {
+          this.produceId(parent);
+
+          return parent.querySelector(":scope > [data-buttons]");
+        })
         .map((parent) => parent.querySelector(":scope > .active"))
         .filter(Boolean)
         .forEach((target) => {
@@ -33,11 +61,7 @@ const vanilaTabs = (function () {
         });
     },
     activeByButtonElement: function (parent, target, extra) {
-      if (!isNode(parent)) {
-        warn(`parent argument is not valid DOM element`, parent);
-
-        return this;
-      }
+      const id = this.produceId(parent);
 
       if (!isNode(target)) {
         warn(`target argument is not valid DOM element`, parent, target);
@@ -56,11 +80,7 @@ const vanilaTabs = (function () {
       return this.activeByIndex(parent, zeroIndex, { buttons });
     },
     activeByIndex: function (parent, zeroIndex, extra) {
-      if (!isNode(parent)) {
-        warn(`parent argument is not valid DOM element`, parent);
-
-        return this;
-      }
+      const id = this.produceId(parent);
 
       let { buttons, divs } = { ...extra };
 
