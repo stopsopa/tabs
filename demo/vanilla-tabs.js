@@ -24,12 +24,13 @@ const vanilaTabs = (function () {
   return {
     active: function () {
       Array.from(
-        document.querySelectorAll(
-          "[data-vanila-tabs] > [data-buttons] > .active"
-        )
-      ).forEach((target) => {
-        this.activeByButtonElement(target.parentNode.parentNode, target);
-      });
+        document.querySelectorAll("[data-vanila-tabs] > [data-buttons]")
+      )
+        .map((parent) => parent.querySelector(":scope > .active"))
+        .filter(Boolean)
+        .forEach((target) => {
+          this.activeByButtonElement(target.parentNode.parentNode, target);
+        });
     },
     activeByButtonElement: function (parent, target, extra) {
       if (!isNode(parent)) {
