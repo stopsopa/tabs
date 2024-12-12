@@ -35,13 +35,13 @@
 [data-vanila-tabs] > [data-buttons] > .active {
   border-bottom: 1px solid white;
 }
-[data-vanila-tabs] > [data-divs] > div {
+[data-vanila-tabs] > [data-tabs] > div {
   border: 1px solid #262626;
   padding: 10px;
   display: none;
   /*display: none;*/
 }
-[data-vanila-tabs] > [data-divs] > div.active {
+[data-vanila-tabs] > [data-tabs] > div.active {
   display: block;
 }
 /* pixelfix */

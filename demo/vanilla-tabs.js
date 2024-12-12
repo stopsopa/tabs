@@ -28,9 +28,7 @@ const vanilaTabs = (function () {
           "[data-vanila-tabs] > [data-buttons] > .active"
         )
       ).forEach((target) => {
-        const parent = target.parentNode.parentNode;
-
-        this.activeByButtonElement(parent, target);
+        this.activeByButtonElement(target.parentNode.parentNode, target);
       });
     },
     activeByButtonElement: function (parent, target, extra) {
@@ -39,6 +37,7 @@ const vanilaTabs = (function () {
 
         return this;
       }
+
       if (!isNode(target)) {
         warn(`target argument is not valid DOM element`, parent, target);
 
@@ -75,7 +74,7 @@ const vanilaTabs = (function () {
       }
 
       if (!divs) {
-        divs = Array.from(parent.querySelector("[data-divs]").children);
+        divs = Array.from(parent.querySelector("[data-tabs]").children);
       }
 
       if (divs.length === 0) {
@@ -138,8 +137,6 @@ const vanilaTabs = (function () {
           const zeroIndex = buttons.indexOf(target);
 
           this.activeByIndex(parent, zeroIndex, { buttons });
-        } else {
-          log("no match", match);
         }
       });
 
