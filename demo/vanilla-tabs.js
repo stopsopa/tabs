@@ -123,7 +123,7 @@ const vanilaTabs = (function () {
 
       bound = true;
 
-      document.body.addEventListener("click", (e) => {
+      const event = (e) => {
         var target = e.target;
 
         var match = target.matches("[data-vanila-tabs] > [data-buttons] > *");
@@ -139,9 +139,13 @@ const vanilaTabs = (function () {
 
           this.activeByIndex(parent, zeroIndex, { buttons });
         }
-      });
+      };
 
-      return this;
+      document.body.addEventListener("click", event);
+
+      return () => {
+        document.body.removeEventListener("click", event);
+      };
     },
   };
 })();
