@@ -47,10 +47,12 @@ const vanilaTabs = (function () {
       return id;
     },
     active: function () {
+      const ids = [];
+
       Array.from(document.querySelectorAll("[data-vanila-tabs]"))
 
         .map((parent) => {
-          this.produceId(parent);
+          ids.push(this.produceId(parent));
 
           return parent.querySelector(":scope > [data-buttons]");
         })
@@ -59,6 +61,8 @@ const vanilaTabs = (function () {
         .forEach((target) => {
           this.activeByButtonElement(target.parentNode.parentNode, target);
         });
+
+      return ids;
     },
     activeByButtonElement: function (parent, target, extra) {
       const id = this.produceId(parent);
@@ -66,7 +70,7 @@ const vanilaTabs = (function () {
       if (!isNode(target)) {
         warn(`target argument is not valid DOM element`, parent, target);
 
-        return this;
+        return id;
       }
 
       let { buttons } = { ...extra };
@@ -77,7 +81,9 @@ const vanilaTabs = (function () {
 
       const zeroIndex = buttons.indexOf(target);
 
-      return this.activeByIndex(parent, zeroIndex, { buttons });
+      this.activeByIndex(parent, zeroIndex, { buttons });
+
+      return id;
     },
     activeByIndex: function (parent, zeroIndex, extra) {
       const id = this.produceId(parent);
@@ -91,7 +97,7 @@ const vanilaTabs = (function () {
       if (buttons.length === 0) {
         warn(`buttons not found`, parent);
 
-        return this;
+        return id;
       }
 
       if (!divs) {
@@ -101,13 +107,13 @@ const vanilaTabs = (function () {
       if (divs.length === 0) {
         warn(`divs not found`, parent);
 
-        return this;
+        return id;
       }
 
       if (buttons.length !== divs.length) {
         warn(`buttons and divs length mismatch`, parent);
 
-        return this;
+        return id;
       }
 
       if (
@@ -119,7 +125,7 @@ const vanilaTabs = (function () {
       ) {
         warn(`zeroIndex not found`, zeroIndex, parent, target);
 
-        return this;
+        return id;
       }
 
       buttons.forEach(function (button, i) {
@@ -132,7 +138,7 @@ const vanilaTabs = (function () {
         }
       });
 
-      return this;
+      return id;
     },
     bind: function () {
       if (bound) {
