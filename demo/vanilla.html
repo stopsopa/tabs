@@ -6,45 +6,14 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
 
-    <meta name="description" content="jQuery.tabs by Szymon Działowski" />
-    <meta name="keywords" content="jQuery.tabs" />
-
-    <script src="jquery.js"></script>
-
-    <script src="underscore.min.js"></script>
-    <link rel="stylesheet" href="../jquery.tabs.v0.1.css" />
-    <script src="../jquery.tabs.v0.1.js"></script>
-
-    <style type="text/css"></style>
-
-    <script>
-      function log(l) {
-        try {
-          console.log(l);
-        } catch (e) {}
-      }
-
-      $(function () {
-        var first = $("[data-tabs]:first")
-          .on("tabs:change", function (e, i, tab, div, isFirst) {
-            if (isFirst) {
-              // div.find('.editor, .syntax').aceedit();
-              div.find('[data-tabs]').tabs();
-            }
-          })
-          .tabs({
-            //                active: 1
-          });
-        //
-      });
-    </script>
+    <link rel="stylesheet" href="vanilla-tabs.css" />
   </head>
   <body>
-    <div data-tabs>
+    <div data-vanila-tabs>
       <div data-buttons>
-        <a href="javascript:;" class="active">html</a>
-        <span>javascript</span>
-        <span>result</span>
+        <a href="javascript:;">html</a>
+        <span class="active">javascript</span>
+        <span>result </span>
       </div>
       <div data-divs>
         <div>
@@ -59,7 +28,7 @@
 
 &lt;script&gt;
     $(function () {
-        $('[data-tabs]')
+        $('[data-vanila-tabs]')
             .on('tabs:change', function (e, i, tab, div, isFirst) {
                 // better define .on() events before call .tabs(),
                 // because .tabs() will have no opportunity to call this event during initialization
@@ -76,7 +45,7 @@
           <div style="clear: both"></div>
         </div>
         <div>
-          <div data-tabs>
+          <div data-vanila-tabs>
             <div data-buttons>
               <span> tab 1 </span>
               <a href="javascript:;"> tab 2 </a>
@@ -140,5 +109,10 @@
         </div>
       </div>
     </div>
+
+    <script src="vanilla-tabs.js"></script>
+    <script>
+      vanilaTabs.bind().active();
+    </script>
   </body>
 </html>
