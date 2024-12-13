@@ -14,7 +14,7 @@
     "jquery",
     "tabs"
   ],
-  "author": "Szymon Działowski <grytysek@gmail.com>",
+  "author": "Szymon Działowski",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/stopsopa/tabs/issues"
