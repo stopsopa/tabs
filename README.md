@@ -1,11 +1,8 @@
-# DEPRECATED
-Created in 2015
+# Doc outdates
 
-... Actually it was [revived](https://stopsopa.github.io/tabs/demo/vanilla.html) to use vanila [event delegation](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Event_bubbling#event_delegation) events but it's not documented yet.
+Documentation was created for old version of this component created back in 2015 based on jQuery.
 
-# jquery.tabs
-
-Simple and very easy to user tab widget for jQuery
+Current [version](https://stopsopa.github.io/tabs/demo/vanilla.html) was rewritten to use to use vanila [event delegation](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Event_bubbling#event_delegation) events.
 
 
 ![ScreenShot](http://stopsopa.github.io/submod/tabs/demo/example.jpg)
