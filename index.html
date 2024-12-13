@@ -1,15 +1,87 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <meta http-equiv="refresh" content="0; url=demo/vanilla.html">
-</head>
-<body>
-    
-    <a href="demo/vanilla.html">Vanilla</a>
-    <br />
-    <a href="demo/demo.html">jQuery</a>
-</body>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <title>jQuery.tabs by Szymon Działowski</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+
+    <link rel="stylesheet" href="vanilla-tabs.css" />
+    <style>
+      body {
+        background-color: antiquewhite;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-vanila-tabs>
+      <div data-buttons>
+        <a href="javascript:;">first create html</a>
+        <span>then run code</span>
+        <span>the result will be </span>
+      </div>
+      <div data-tabs>
+        <div>
+          <pre>
+&lt;div data-vanila-tabs&gt;
+    &lt;div data-buttons&gt;
+        &lt;a href="javascript:;"&gt;html&lt;/a&gt;
+        &lt;span class="active"&gt;javascript&lt;/span&gt;
+        &lt;span&gt;result&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div data-tabs&gt;
+        &lt;div&gt;
+            my stuff for tab 1
+        &lt;/div&gt;
+        &lt;div&gt;
+            my stuff for tab 2
+            &lt;br /&gt;
+            &lt;img src="//i.imgur.com/SkkKinS.jpg" width="110" /&gt
+        &lt;/div&gt;
+        &lt;div&gt;
+            my stuff for tab 3
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+          </pre>
+          <div style="clear: both"></div>
+        </div>
+        <div>
+          <pre>
+
+&lt;script src="vanilla-tabs.js"&gt;&lt;/script&gt;
+&lt;script&gt;        
+  const unbind = vanilaTabs.bind();
+  vanilaTabs.active();
+&lt;/script&gt;
+
+</pre
+          >
+        </div>
+        <div>
+          <div data-vanila-tabs>
+            <div data-buttons>
+                <a href="javascript:;">html</a>
+                <span class="active">javascript</span>
+                <span>result</span>
+            </div>
+            <div data-tabs>
+              <div>my stuff for tab 1</div>
+              <div>my stuff for tab 2                
+                <br />
+                <img src="//i.imgur.com/SkkKinS.jpg" width="110" />
+              </div>
+              <div>my stuff for tab 3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="vanilla-tabs.js"></script>
+    <script>
+      const unbind = vanilaTabs.bind();
+      vanilaTabs.active();
+    </script>
+  </body>
 </html>
