@@ -5,10 +5,9 @@ I'll update it later
 
 Current [version](https://stopsopa.github.io/tabs/demo/vanilla.html) was rewritten to use to use vanila [event delegation](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Event_bubbling#event_delegation) events.
 
-<p align="center">
+
   
 ![ScreenShot](tabs.gif)
-</p>
 
 ## Demo
 
