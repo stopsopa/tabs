@@ -1,6 +1,7 @@
-const log = console.log;
-
-const vanilaTabs = (function () {
+/**
+ * https://github.com/stopsopa/tabs
+ */
+window.vanilaTabs = (function () {
   const dataidkey = "data-vanilla-tab-id";
 
   let i = 0;
