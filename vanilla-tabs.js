@@ -39,8 +39,6 @@ window.vanilaTabs = (function () {
     produceId: function (parent) {
       if (!isNode(parent)) {
         throw th(`parent argument is not valid DOM element`, parent);
-
-        return;
       }
 
       let id = parent.getAttribute(dataidkey);
@@ -57,7 +55,6 @@ window.vanilaTabs = (function () {
       const { onChange } = { ...opt };
 
       Array.from(document.querySelectorAll("[data-vanila-tabs]"))
-
         .map((parent) => {
           ids.push(this.produceId(parent));
 
@@ -86,8 +83,6 @@ window.vanilaTabs = (function () {
 
       if (!isNode(target)) {
         throw th(`target argument is not valid DOM element`, parent, target);
-
-        return id;
       }
 
       let { buttons, onChange } = { ...extra };
@@ -136,8 +131,6 @@ window.vanilaTabs = (function () {
 
       if (buttons.length !== tabs.length) {
         throw th(`buttons and tabs length mismatch`, parent);
-
-        return id;
       }
 
       if (
@@ -148,8 +141,6 @@ window.vanilaTabs = (function () {
         )
       ) {
         throw th(`zeroIndex not found`, zeroIndex, parent, target);
-
-        return id;
       }
 
       {
