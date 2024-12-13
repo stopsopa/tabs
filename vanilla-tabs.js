@@ -16,6 +16,8 @@ window.vanilaTabs = (function () {
     }
   })();
 
+  const th = msg => new Error(`vanilla-tabs error: ${msg}`);
+
   function isObjectLike(value) {
     return value != null && typeof value == "object";
   }
@@ -36,9 +38,9 @@ window.vanilaTabs = (function () {
     },
     produceId: function (parent) {
       if (!isNode(parent)) {
-        warn(`parent argument is not valid DOM element`, parent);
+        throw th(`parent argument is not valid DOM element`, parent);
 
-        return this;
+        return;
       }
 
       let id = parent.getAttribute(dataidkey);
@@ -83,7 +85,7 @@ window.vanilaTabs = (function () {
       const id = this.produceId(parent);
 
       if (!isNode(target)) {
-        warn(`target argument is not valid DOM element`, parent, target);
+        throw th(`target argument is not valid DOM element`, parent, target);
 
         return id;
       }
@@ -133,7 +135,7 @@ window.vanilaTabs = (function () {
       }
 
       if (buttons.length !== tabs.length) {
-        warn(`buttons and tabs length mismatch`, parent);
+        throw th(`buttons and tabs length mismatch`, parent);
 
         return id;
       }
@@ -145,7 +147,7 @@ window.vanilaTabs = (function () {
           zeroIndex > -1
         )
       ) {
-        warn(`zeroIndex not found`, zeroIndex, parent, target);
+        throw th(`zeroIndex not found`, zeroIndex, parent, target);
 
         return id;
       }
