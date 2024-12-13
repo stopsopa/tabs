@@ -81,10 +81,6 @@ window.vanilaTabs = (function () {
     activeByButtonElement: function (parent, target, extra) {
       const id = this.produceId(parent);
 
-      if (!isNode(target)) {
-        throw th(`target argument is not valid DOM element`, parent, target);
-      }
-
       let { buttons, onChange } = { ...extra };
 
       if (!buttons) {
