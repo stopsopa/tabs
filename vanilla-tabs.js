@@ -56,7 +56,15 @@ const vanilaTabs = (function () {
 
           return parent.querySelector(":scope > [data-buttons]");
         })
-        .map((parent) => parent.querySelector(":scope > .active"))
+        .map((parent) => {
+          let active = parent.querySelector(":scope > .active");
+
+          if (!active) {
+            active = parent.querySelector(":scope > *");
+          }
+
+          return active;
+        })
         .filter(Boolean)
         .forEach((target) => {
           this.activeByButtonElement(target.parentNode.parentNode, target);
@@ -79,13 +87,13 @@ const vanilaTabs = (function () {
         buttons = Array.from(parent.querySelector("[data-buttons]").children);
       }
 
-      const zeroIndex = buttons.indexOf(target);
+      const zeroIndex = buttons.indexOf(target) ?? 0;
 
       this.activeByIndex(parent, zeroIndex, { buttons });
 
       return id;
     },
-    activeByIndex: function (parent, zeroIndex, extra) {
+    activeByIndex: function (parent, zeroIndex = 0, extra) {
       const id = this.produceId(parent);
 
       let { buttons, divs } = { ...extra };
@@ -161,7 +169,7 @@ const vanilaTabs = (function () {
             parent.querySelector("[data-buttons]").children
           );
 
-          const zeroIndex = buttons.indexOf(target);
+          const zeroIndex = buttons.indexOf(target) ?? 0;
 
           this.activeByIndex(parent, zeroIndex, { buttons });
         }
