@@ -54,7 +54,7 @@ window.vanilaTabs = (function () {
 
       const { onChange } = { ...opt };
 
-      Array.from(document.querySelectorAll("[data-vanila-tabs]"))
+      Array.from(document.querySelectorAll("[data-vanilla-tabs]"))
         .map((parent) => {
           ids.push(this.produceId(parent));
 
@@ -177,7 +177,7 @@ window.vanilaTabs = (function () {
       const event = (e) => {
         var target = e.target;
 
-        var match = target.matches("[data-vanila-tabs] > [data-buttons] > *");
+        var match = target.matches("[data-vanilla-tabs] > [data-buttons] > *");
 
         if (match) {
           const parent = target.parentNode.parentNode;
