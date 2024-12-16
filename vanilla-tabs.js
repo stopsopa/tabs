@@ -16,7 +16,7 @@ window.vanillaTabs = (function () {
     }
   })();
 
-  const th = msg => new Error(`vanilla-tabs error: ${msg}`);
+  const th = (msg) => new Error(`vanilla-tabs error: ${msg}`);
 
   function isObjectLike(value) {
     return value != null && typeof value == "object";
