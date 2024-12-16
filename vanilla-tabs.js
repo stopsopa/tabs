@@ -1,7 +1,7 @@
 /**
  * https://github.com/stopsopa/tabs
  */
-window.vanilaTabs = (function () {
+window.vanillaTabs = (function () {
   const onChangeEvents = {};
 
   const dataidkey = "data-vanilla-tab-id";
