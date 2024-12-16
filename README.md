@@ -11,7 +11,7 @@ Current [version](https://stopsopa.github.io/tabs/demo/vanilla.html) was rewritt
 
 ## Demo
 
-  [Demo](https://stopsopa.github.io/tabs/demo/vanilla.html)
+  [Demo](https://stopsopa.github.io/tabs/)
 
 ***
 
