@@ -6,7 +6,31 @@ I'll update it later
 Current [version](https://stopsopa.github.io/tabs/) was rewritten to use to use vanilla [event delegation](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Event_bubbling#event_delegation) technique
 .
 
+# versions
 
+## latest (not recommended to use)
+```html
+
+<link rel="stylesheet" href="https://stopsopa.github.io/tabs/vanilla-tabs.css" />                
+<script src="https://stopsopa.github.io/tabs/vanilla-tabs.js"></script>
+
+<script>
+  const unbind = vanillaTabs.bind();
+  vanillaTabs.active();
+</script>
+
+```
+
+## v1.0.0
+
+```html
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.0/vanilla-tabs.css" />  
+<script src="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.0/vanilla-tabs.js"></script>
+
+```
+
+# preview
   
 ![ScreenShot](tabs.gif)
 
