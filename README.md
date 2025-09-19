@@ -37,8 +37,23 @@ and watch mode // so next section is not needed (.bind(), .active(),
   rel="stylesheet"
   href="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.0/vanilla-tabs.css"
 />
-<script src="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.0/vanilla-tabs.js?vanilla-tabs-autoenable"></script>
+<script src="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.0/vanilla-tabs.js"></script>
 ```
+
+## v1.0.1
+
+```html
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.1/vanilla-tabs.css"
+/>
+<script src="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.1/vanilla-tabs.js?vanilla-tabs-autoenable"></script>
+```
+
+To refresh jsdelivr visit: https://purge.jsdelivr.net/gh/stopsopa/tabs@v1.0.1/vanilla-tabs.js
+pointing to version specified by latest tag
+
+Inspecting version in jsdelivr: https://www.jsdelivr.com/package/npm/stopsopa.tabs
 
 # preview
 
