@@ -15,8 +15,13 @@ Current [version](https://stopsopa.github.io/tabs/) was rewritten to use to use 
 <script src="https://stopsopa.github.io/tabs/vanilla-tabs.js"></script>
 
 <script>
-  const unbind = vanillaTabs.bind();
-  vanillaTabs.active();
+    const unbind = vanillaTabs.bind();
+    vanillaTabs.active();
+
+    // that will trigger .activate() everytime new [data-buttons] 
+    // will be created anywhere in the document
+    vanillaTabs.watchMutationsEnable();
+    
 </script>
 
 ```
@@ -26,7 +31,9 @@ Current [version](https://stopsopa.github.io/tabs/) was rewritten to use to use 
 ```html
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.0/vanilla-tabs.css" />  
-<script src="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.0/vanilla-tabs.js"></script>
+<script 
+src="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.0/vanilla-tabs.js?vanilla-tabs-autoenable"
+></script>
 
 ```
 

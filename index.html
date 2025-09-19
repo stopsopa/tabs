@@ -2,7 +2,7 @@
 <html lang="en-US">
   <head>
     <meta charset="UTF-8" />
-    <title>jQuery.tabs by Szymon Działowski</title>
+    <title>tabs by Szymon Działowski</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
 
@@ -10,6 +10,9 @@
     <style>
       body {
         background-color: antiquewhite;
+      }
+      .spacer {
+        padding-top: 30px;
       }
     </style>
   </head>
@@ -57,31 +60,102 @@
 
 </pre
           >
+          <button class="create">create</button>
+          <button class="add_tab">add tab</button>
         </div>
         <div>
           <div data-vanilla-tabs>
             <div data-buttons>
-                <a href="javascript:;">html</a>
-                <span class="active">javascript</span>
-                <span>result</span>
+              <a href="javascript:;">html</a>
+              <span class="active">javascript</span>
+              <span>result</span>
             </div>
             <div data-tabs>
               <div>my stuff for tab 1</div>
-              <div>my stuff for tab 2                
+              <div>
+                my stuff for tab 2
                 <br />
                 <img src="//i.imgur.com/SkkKinS.jpg" width="110" />
               </div>
-              <div>my stuff for tab 3</div>
+              <div>
+                my stuff for tab 3
+                <button class="create">create</button>
+                <button class="add_tab">add tab</button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <script src="vanilla-tabs.js"></script>
+    <button class="create">create</button>
+
+    <script src="vanilla-tabs.js?vanilla-tabs-autoenable"></script>
+
     <script>
-      const unbind = vanillaTabs.bind();
-      vanillaTabs.active();
+      {
+        let i = 0;
+        document.body.addEventListener("click", function (e) {
+          var el = e.target;
+
+          if (!el.matches(".add_tab")) return;
+
+          i += 1;
+          const parent = el.closest("[data-vanilla-tabs]");
+          const buttons = parent.querySelector("[data-buttons]");
+          const tabs = parent.querySelector("[data-tabs]");
+
+          const tab = document.createElement("span");
+
+          const box = document.createElement("div");
+
+          tab.innerText = "tab " + i;
+
+          box.innerText = "content " + i;
+
+          buttons.appendChild(tab);
+          tabs.appendChild(box);
+        });
+      }
+
+      {
+        let i = 0;
+        document.body.addEventListener("click", function (e) {
+          var el = e.target;
+
+          if (!el.matches(".create")) return;
+
+          i += 1;
+          const parent = el.parentNode;
+          const container = document.createElement("div");
+          container.classList.add("spacer");
+          container.innerHTML = `
+          <div data-vanilla-tabs>
+    <div data-buttons>
+        <a href="javascript:;">first tab ${i}</a>
+        <span class="active">javascript</span>
+        <span>result</span>
+    </div>
+    <div data-tabs>
+        <div>
+            my stuff for tab 1
+        </div>
+        <div>
+            my stuff for tab 2
+            <br />
+            <img src="//i.imgur.com/SkkKinS.jpg" width="110" />
+        </div>
+        <div>
+            my stuff for tab 3
+            <button class="create">create</button>
+            <button class="add_tab">add tab</button>
+        </div>
+    </div>
+</div>
+        `;
+          parent.appendChild(container);
+        });
+      }
     </script>
   </body>
 </html>
