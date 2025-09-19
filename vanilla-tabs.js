@@ -30,7 +30,7 @@ window.vanillaTabs = (function () {
   }
 
   let bound = false;
-  return {
+  const tool = {
     getNewId: function () {
       i += 1;
 
@@ -199,4 +199,73 @@ window.vanillaTabs = (function () {
       };
     },
   };
+
+  let observer;
+  function watchMutationsEnable() {
+    if (observer) {
+      return;
+    }
+    observer = new MutationObserver(function (mutations) {
+      // Replace old iteration with Array.some to break early when a matching element is found
+      const found = mutations.some(function (mutation) {
+        if (mutation.type === "childList") {
+          return Array.from(mutation.addedNodes).some(function (node) {
+            return (
+              node.nodeType === Node.ELEMENT_NODE &&
+              node.matches &&
+              (node.matches("[data-buttons]") ||
+                node.querySelector("[data-buttons]"))
+            );
+          });
+        }
+        return false;
+      });
+      if (found) {
+        tool.active();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  function watchMutationsDisable() {
+    if (observer && typeof observer.disconnect === "function") {
+      observer.disconnect();
+    }
+  }
+
+  tool.watchMutationsEnable = watchMutationsEnable;
+  tool.watchMutationsDisable = watchMutationsDisable;
+
+  // autobind when certain condition met
+
+  let autoenable = (function () {
+    if (document.body.classList.contains("vanilla-tabs-autoenable")) {
+      return true;
+    }
+
+    return [...document.querySelectorAll("script")].some((el) => {
+      const src = el.getAttribute("src");
+
+      if (typeof src === "string" && src.length > 0) {
+        const url = new URL(src, window.location.href);
+        if (url.searchParams.has("vanilla-tabs-autoenable")) {
+          return true;
+        }
+      }
+    });
+  })();
+
+  if (autoenable) {
+    const unbind = tool.bind();
+
+    tool.active();
+
+    tool.watchMutationsEnable();
+
+    tool.autoenableUnbind = function () {
+      tool.watchMutationsDisable();
+      unbind();
+    };
+  }
+  return tool;
 })();
