@@ -6,6 +6,13 @@ I'll update it later
 Current [version](https://stopsopa.github.io/tabs/) was rewritten to use to use vanilla [event delegation](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Event_bubbling#event_delegation) technique
 .
 
+# What is it?
+
+It would be nice to have some easy to use tabs system for raw html which would work declaratively just after loading one js and one css file, without need for manual javascript to attach event.
+Also that should also work for all dynamically created formation of html tags introduced to the page after initial library is loaded.
+
+So this is that. Have fun, just go and see demo page: stopsopa.github.io/tabs/
+
 # versions
 
 ## latest (not recommended to use)
