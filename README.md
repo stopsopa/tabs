@@ -1,10 +1,4 @@
-# Doc mostly outdated
 
-Documentation was created for old version of this component created back in 2015 based on jQuery.
-I'll update it later
-
-Current [version](https://stopsopa.github.io/tabs/) was rewritten to use to use vanilla [event delegation](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Event_bubbling#event_delegation) technique
-.
 
 # What is it?
 
@@ -12,6 +6,16 @@ It would be nice to have some easy to use tabs system for raw html which would w
 Also that should also work for all dynamically created formation of html tags introduced to the page after initial library is loaded.
 
 So this is that. Have fun, just go and see demo page: stopsopa.github.io/tabs/
+
+# Doc mostly outdated
+
+.. docs in this README.md is outdated but visit stopsopa.github.io/tabs/ this is up to date and self explanatory. There is not much magic behind it. Have fun.
+
+Documentation was created for old version of this component created back in 2015 based on jQuery.
+I'll update it later
+
+Current [version](https://stopsopa.github.io/tabs/) was rewritten to use to use vanilla [event delegation](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Event_bubbling#event_delegation) technique
+.
 
 # versions
 
