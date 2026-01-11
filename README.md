@@ -9,7 +9,7 @@ So this is that. Have fun, just go and see demo page: stopsopa.github.io/tabs/
 
 # Doc mostly outdated
 
-.. docs in this README.md is outdated but visit stopsopa.github.io/tabs/ this is up to date and self explanatory. There is not much magic behind it. Have fun.
+.. docs in this README.md is outdated but visit stopsopa.github.io/tabs/ this is up to date and self explanatory. There is not much magic behind it, just around 270 lines of vanilla js. Have fun.
 
 Documentation was created for old version of this component created back in 2015 based on jQuery.
 I'll update it later
