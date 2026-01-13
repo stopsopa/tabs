@@ -8,58 +8,80 @@
 
     <link rel="stylesheet" href="vanilla-tabs.css" />
     <style>
-      body {
-        background-color: antiquewhite;
-      }
       .spacer {
         padding-top: 30px;
+      }
+      body {
+        background-color: antiquewhite;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+          Arial, sans-serif;
       }
     </style>
   </head>
   <body>
     <div data-vanilla-tabs>
       <div data-buttons>
-        <a href="javascript:;">first create html</a>
-        <span>then run code</span>
+        <span>1) load script</span>
+        <a href="javascript:;">2) then use tags</a>
+        <span>then run code (optional)</span>
         <span>the result will be </span>
       </div>
       <div data-tabs>
         <div>
-          <pre>
-&lt;div data-vanilla-tabs&gt;
-    &lt;div data-buttons&gt;
-        &lt;a href="javascript:;"&gt;html&lt;/a&gt;
-        &lt;span class="active"&gt;javascript&lt;/span&gt;
-        &lt;span&gt;result&lt;/span&gt;
-    &lt;/div&gt;
-    &lt;div data-tabs&gt;
-        &lt;div&gt;
-            my stuff for tab 1
-        &lt;/div&gt;
-        &lt;div&gt;
-            my stuff for tab 2
-            &lt;br /&gt;
-            &lt;img src="//i.imgur.com/SkkKinS.jpg" width="110" /&gt
-        &lt;/div&gt;
-        &lt;div&gt;
-            my stuff for tab 3
-        &lt;/div&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
-          </pre>
+          <ace-editor lang="javascript">
+            <script type="ace">
+              // download files vanilla-tabs.css and vanilla-tabs.js
+              // from: https://github.com/stopsopa/tabs
+              // and add them to your project
+              // and then load to your html page
+              <link rel="stylesheet" href="vanilla-tabs.css" />
+              and
+              <script src="vanilla-tabs.js?vanilla-tabs-autoenable">&lt;/script>
+            </script>
+          </ace-editor>
+        </div>
+        <div>
+          <ace-editor lang="html">
+            <script type="ace">
+              <div data-vanilla-tabs>
+                  <div data-buttons>
+                      <a href="javascript:;">html</a>
+                      <span class="active">javascript</span>
+                      <span>result</span>
+                  </div>
+                  <div data-tabs>
+                      <div>
+                          my stuff for tab 1
+                      </div>
+                      <div>
+                          my stuff for tab 2
+                          <br />
+                          <img src="https://github.com/user-attachments/assets/bdbd4da2-5b56-46ae-892b-3c92e0f6ff2f" width="110" /&gt
+                      </div>
+                      <div>
+                          my stuff for tab 3
+                      </div>
+                  </div>
+              </div>
+            </script>
+          </ace-editor>
+
           <div style="clear: both"></div>
         </div>
         <div>
-          <pre>
-
-&lt;script src="vanilla-tabs.js"&gt;&lt;/script&gt;
-&lt;script&gt;        
-  const unbind = vanillaTabs.bind();
-  vanillaTabs.active();
-&lt;/script&gt;
-
-</pre
-          >
+          <alert-box type="warning">
+            This is not needed if vanilla-tabs.js is loaded with
+            ?vanilla-tabs-autoenable
+          </alert-box>
+          <ace-editor lang="html">
+            <script type="ace">
+              <script src="vanilla-tabs.js">&lt;/script>
+              <script>
+                const unbind = vanillaTabs.bind();
+                vanillaTabs.active();
+              &lt;/script>
+            </script>
+          </ace-editor>
           <button class="create">create</button>
           <button class="add_tab">add tab</button>
         </div>
@@ -75,7 +97,10 @@
               <div>
                 my stuff for tab 2
                 <br />
-                <img src="//i.imgur.com/SkkKinS.jpg" width="110" />
+                <img
+                  src="https://github.com/user-attachments/assets/bdbd4da2-5b56-46ae-892b-3c92e0f6ff2f"
+                  width="110"
+                />
               </div>
               <div>
                 my stuff for tab 3
@@ -143,7 +168,7 @@
         <div>
             my stuff for tab 2
             <br />
-            <img src="//i.imgur.com/SkkKinS.jpg" width="110" />
+            <img src="https://github.com/user-attachments/assets/bdbd4da2-5b56-46ae-892b-3c92e0f6ff2f" width="110" />
         </div>
         <div>
             my stuff for tab 3
@@ -157,5 +182,14 @@
         });
       }
     </script>
+    <script src="https://stopsopa.github.io/alert-webcomponent/alert-box.js"></script>
+    <!-- <script src="./alert-box.js"></script> -->
+
+    <!-- src="./ace-web-component.js" -->
+    <script
+      type="module"
+      src="https://stopsopa.github.io/ace-editor-webcomponent/ace-web-component.js"
+      data-main-ace="https://cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/ace.min.js"
+    ></script>
   </body>
 </html>
