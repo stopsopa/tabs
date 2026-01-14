@@ -16,7 +16,7 @@ So this is that. Around 270 lines of vanilla js. Have fun.
 
 https://stopsopa.github.io/tabs/
 
-Current [version](https://stopsopa.github.io/tabs/) was rewritten to use vanilla [event delegation](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Event_bubbling#event_delegation) technique.
+Current version was rewritten to use vanilla [event delegation](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Event_bubbling#event_delegation) technique.
 
 # versions
 
