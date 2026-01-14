@@ -62,11 +62,12 @@ and watch mode // so next section is not needed (.bind(), .active(),
 <script src="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.1/vanilla-tabs.js?vanilla-tabs-autoenable"></script>
 ```
 
+# Dev notes
+
 To refresh jsdelivr visit: https://purge.jsdelivr.net/gh/stopsopa/tabs@v1.0.1/vanilla-tabs.js
 pointing to version specified by latest tag
 
 Inspecting version in jsdelivr: https://www.jsdelivr.com/package/npm/stopsopa.tabs
-
 
 ### License
 
