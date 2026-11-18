@@ -62,6 +62,67 @@ and watch mode // so next section is not needed (.bind(), .active(),
 <script src="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.1/vanilla-tabs.js?vanilla-tabs-autoenable"></script>
 ```
 
+# Colors
+
+Tabs are transparent by default. Background and lines color are css variables:
+
+```html
+<!-- all instances -->
+<style>
+  [data-vanilla-tabs] {
+    --vanilla-tabs-background-color: white;
+    --vanilla-tabs-lines-color: #565656;
+  }
+</style>
+
+<!-- single instance via style -->
+<div data-vanilla-tabs style="--vanilla-tabs-background-color: white">...</div>
+
+<!-- single instance via attributes (applied by js) -->
+<div data-vanilla-tabs data-background-color="white" data-lines-color="navy">
+  ...
+</div>
+```
+
+# Events
+
+Every time tab becomes visible (also the initial one) `vanilla-tabs:change` event is dispatched on the tab content element and it bubbles:
+
+```js
+// register before loading vanilla-tabs.js to catch initially active tabs too
+document.addEventListener("vanilla-tabs:change", function (e) {
+  const { parent, button, tab, index } = e.detail;
+});
+```
+
+Or bind to single `[data-vanilla-tabs]` element - listener lives on that element, so it is destroyed together with it when element is removed:
+
+```js
+const unbind = vanillaTabs.on(element, function ({ parent, button, tab, index }) {});
+```
+
+# ESM
+
+The same library as ES module (`vanilla-tabs.esm.js`):
+
+```html
+<script type="module">
+  import vanillaTabs from "https://stopsopa.github.io/tabs/vanilla-tabs.esm.js?vanilla-tabs-autoenable";
+</script>
+```
+
+Don't load both `vanilla-tabs.js` and `vanilla-tabs.esm.js` on the same page.
+
+# More tabs than available width
+
+Prev/next arrows show up automatically when buttons don't fit. If you add/remove buttons manually
+and you don't use watch mode, call `vanillaTabs.updateOverflow(element)` afterwards.
+
+# Skill for AI agents
+
+[skills/vanilla-tabs/SKILL.md](skills/vanilla-tabs/SKILL.md) is a standard agent skill explaining to AI how to use this library.
+Copy `skills/vanilla-tabs` directory to the skills directory of your agent (for Claude Code: `.claude/skills/` in your project or `~/.claude/skills/`).
+
 # Dev notes
 
 To refresh jsdelivr visit: https://purge.jsdelivr.net/gh/stopsopa/tabs@v1.0.1/vanilla-tabs.js

@@ -3,7 +3,8 @@
   "version": "1.0.1",
   "description": "Another js tab component",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "transpile": "/bin/bash transpile.sh"
   },
   "repository": {
     "type": "git",
@@ -18,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/stopsopa/tabs/issues"
   },
-  "homepage": "https://github.com/stopsopa/tabs#readme"
+  "homepage": "https://github.com/stopsopa/tabs#readme",
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
 }

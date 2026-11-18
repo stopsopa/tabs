@@ -46,13 +46,21 @@ cat <<EEE
     http://localhost:\${DYNAMO_ADMIN_PORT}
 EEE
 read -p "\n      Press enter to continue\n"
-#python -m http.server \${DYNAMO_ADMIN_PORT} --directory .
-
-# for python version 2.7
-
-# cd ./coverage
-python -m SimpleHTTPServer \${DYNAMO_ADMIN_PORT}
+python3 -m http.server \${DYNAMO_ADMIN_PORT} --directory .
 `,
+      confirm: false,
+    },
+
+    [`transpile`]: {
+      command: `
+set -e
+# vanilla-tabs.ts -> vanilla-tabs.js (esbuild)
+if [ ! -d node_modules ]; then
+  npm install
+fi
+/bin/bash transpile.sh
+`,
+      description: "vanilla-tabs.ts -> vanilla-tabs.js (esbuild)",
       confirm: false,
     },
 
