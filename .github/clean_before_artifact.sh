@@ -26,3 +26,6 @@ rm -rf .vscode
 rm -rf .github
 rm -rf .env*
 rm -rf package.json
+rm -rf node_modules
+rm -rf package-lock.json
+rm -rf transpile.sh

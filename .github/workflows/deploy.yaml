@@ -129,6 +129,12 @@ jobs:
     #     run: |
     #       /bin/bash .github/stop-server.sh
 
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Transpile vanilla-tabs.ts -> vanilla-tabs.js
+        run: /bin/bash transpile.sh
+
       - name: Clean before artifact
         run: /bin/bash .github/clean_before_artifact.sh
 
