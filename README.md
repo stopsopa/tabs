@@ -18,31 +18,47 @@ https://stopsopa.github.io/tabs/
 
 Current version was rewritten to use vanilla [event delegation](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Event_bubbling#event_delegation) technique.
 
-# versions
+# Install
 
-## latest (not recommended to use)
+Copy files from [skills/vanilla-tabs](skills/vanilla-tabs) to your project (this is where the generated files live):
+
+- `vanilla-tabs.css`
+- `vanilla-tabs.esm.js` - ES module, preferred (native browser ESM and bundlers)
+- `vanilla-tabs.js` - classic script, for older setups
 
 ```html
-<link
-  rel="stylesheet"
-  href="https://stopsopa.github.io/tabs/vanilla-tabs.css"
-/>
-<script src="https://stopsopa.github.io/tabs/vanilla-tabs.js?vanilla-tabs-autoenable"></script>
-// presence of 'vanilla-tabs-autoenable' in query string triggers autobinding
-and watch mode // so next section is not needed (.bind(), .active(),
-.watchMutationsEnable())
-
-<script>
-  const unbind = vanillaTabs.bind();
-  vanillaTabs.active();
-
-  // that will trigger .activate() everytime new [data-buttons]
-  // will be created anywhere in the document
-  vanillaTabs.watchMutationsEnable();
+<link rel="stylesheet" href="./vanilla-tabs.css" />
+<script type="module">
+  import vanillaTabs from "./vanilla-tabs.esm.js?vanilla-tabs-autoenable";
 </script>
+
+<!-- or, older setups (instead of the module above): -->
+<script src="./vanilla-tabs.js?vanilla-tabs-autoenable"></script>
 ```
 
-## v1.0.0
+Presence of `vanilla-tabs-autoenable` in query string triggers autobinding and watch mode, otherwise call:
+
+```js
+const unbind = vanillaTabs.bind();
+vanillaTabs.active();
+
+// that will trigger .activate() everytime new [data-buttons]
+// will be created anywhere in the document
+vanillaTabs.watchMutationsEnable();
+```
+
+## Latest from github pages (not recommended to use)
+
+```html
+<link rel="stylesheet" href="https://stopsopa.github.io/tabs/skills/vanilla-tabs/vanilla-tabs.css" />
+<script src="https://stopsopa.github.io/tabs/skills/vanilla-tabs/vanilla-tabs.js?vanilla-tabs-autoenable"></script>
+```
+
+Note: before the files moved to `skills/vanilla-tabs/` they were served from `https://stopsopa.github.io/tabs/vanilla-tabs.*`.
+
+## Older versions (files in repo root)
+
+### v1.0.0
 
 ```html
 <link
@@ -52,7 +68,7 @@ and watch mode // so next section is not needed (.bind(), .active(),
 <script src="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.0/vanilla-tabs.js"></script>
 ```
 
-## v1.0.1
+### v1.0.1
 
 ```html
 <link
@@ -103,13 +119,7 @@ const unbind = vanillaTabs.on(element, function ({ parent, button, tab, index })
 
 # ESM
 
-The same library as ES module (`vanilla-tabs.esm.js`):
-
-```html
-<script type="module">
-  import vanillaTabs from "https://stopsopa.github.io/tabs/vanilla-tabs.esm.js?vanilla-tabs-autoenable";
-</script>
-```
+The same library as ES module (`vanilla-tabs.esm.js`), see Install above.
 
 Don't load both `vanilla-tabs.js` and `vanilla-tabs.esm.js` on the same page.
 
@@ -121,9 +131,12 @@ and you don't use watch mode, call `vanillaTabs.updateOverflow(element)` afterwa
 # Skill for AI agents
 
 [skills/vanilla-tabs/SKILL.md](skills/vanilla-tabs/SKILL.md) is a standard agent skill explaining to AI how to use this library.
+The directory also contains the generated `vanilla-tabs.css`, `vanilla-tabs.esm.js` and `vanilla-tabs.js`; the skill instructs the agent to copy them into your project and use them from there.
 Copy `skills/vanilla-tabs` directory to the skills directory of your agent (for Claude Code: `.claude/skills/` in your project or `~/.claude/skills/`).
 
 # Dev notes
+
+Source is `vanilla-tabs.ts`; `npm run transpile` (or `xx transpile`) generates `skills/vanilla-tabs/vanilla-tabs.js` and `vanilla-tabs.esm.js` - commit them.
 
 To refresh jsdelivr visit: https://purge.jsdelivr.net/gh/stopsopa/tabs@v1.0.1/vanilla-tabs.js
 pointing to version specified by latest tag
