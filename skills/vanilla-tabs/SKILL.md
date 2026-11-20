@@ -16,7 +16,7 @@ Files next to this `SKILL.md` which you should normally consider copying into th
 - `vanilla-tabs.esm.js` - ES module version (preferred, see "Which JS file" below)
 - `vanilla-tabs.js` - classic script version (older setups, see below)
 
-Copy only the JS file you actually need (plus the CSS). Never edit the copies' generated code.
+Copy only the JS file you actually need (plus the CSS).
 
 Before copying <FILE>, search the project for it
 (exclude dependencies directories typical to current project setup - like node_modules for node.js).

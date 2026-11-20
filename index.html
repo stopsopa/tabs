@@ -16,9 +16,16 @@
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
           Arial, sans-serif;
       }
+      @media print {
+        github-ribbon {
+          display: none;
+        }
+      }
     </style>
+    <script src="https://cdn.jsdelivr.net/gh/MarketingPipeline/GitHub-Ribbon-Web-Component/dist/github-ribbon-wc.min.js" defer></script>
   </head>
   <body>
+    <github-ribbon link="https://github.com/stopsopa/tabs" type="right" color="#679d2c">Fork me on GitHub</github-ribbon>
     <div data-vanilla-tabs>
       <div data-buttons>
         <span>1) load script</span>
