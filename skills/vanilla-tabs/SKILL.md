@@ -8,30 +8,61 @@ description: Add tabs to a plain HTML page with the stopsopa vanilla-tabs librar
 Dependency-free, declarative tabs: load one CSS file and one JS file, write the markup, done.
 No manual initialisation is needed and tabs injected into the page later work automatically.
 
+## Files shipped with this skill
+
+Files next to this `SKILL.md` which you should normally consider copying into the user's project and using directly:
+
+- `vanilla-tabs.css` - styles, always needed
+- `vanilla-tabs.esm.js` - ES module version (preferred, see "Which JS file" below)
+- `vanilla-tabs.js` - classic script version (older setups, see below)
+
+Copy only the JS file you actually need (plus the CSS). Never edit the copies' generated code.
+
+Before copying <FILE>, search the project for it
+(exclude dependencies directories typical to current project setup - like node_modules for node.js).
+If it is already there, use that copy and follow the comment at its top; do not copy or import it again.
+If it is not there, copy it into the project, import it once, and write a short comment at the top of the copy with:
+
+- where it is imported,
+- how to use it in this particular project (framework, build setup, conventions),
+- how to find the places that use it (what to search for).
+
+(For `vanilla-tabs.css` write that comment as a `/* ... */` block at the top of the copy.)
+
+## Which JS file
+
+- **`vanilla-tabs.esm.js`** - default choice. Native browser ES modules (`<script type="module">`) and any modern bundler.
+- **`vanilla-tabs.js`** - older setups: no ES module support, plain `<script src>` without a bundler, or an older toolchain
+  that cannot handle ESM. Defines `window.vanillaTabs`. (The library needs a DOM, so it is not usable in plain Node.js.)
+
+Use one or the other, never both on the same page.
+
 ## 1. Load
 
-```html
-<link rel="stylesheet" href="https://stopsopa.github.io/tabs/vanilla-tabs.css" />
-<script src="https://stopsopa.github.io/tabs/vanilla-tabs.js?vanilla-tabs-autoenable"></script>
-```
-
-- `?vanilla-tabs-autoenable` in the script URL turns on click handling, activates all tabs present
-  and watches the DOM for tabs added later. Alternative with the same effect: `<body class="vanilla-tabs-autoenable">`.
-- Put the `<script>` at the end of `<body>` (it reads `document.body` immediately). Do not load it in `<head>` without `defer`.
-- The URLs above are the latest version. Pinned versions are served from
-  `https://cdn.jsdelivr.net/gh/stopsopa/tabs@<tag>/vanilla-tabs.{css,js}` - but colors via variables/attributes,
-  overflow arrows, the `vanilla-tabs:change` event and `vanillaTabs.on()` exist only in versions newer than `v1.0.1`.
-- If the project keeps local copies, load those instead. `vanilla-tabs.js` is generated from `vanilla-tabs.ts` -
-  never edit the `.js` / `.esm.js` files.
-
-ES module alternative (same API as default export, it also defines `window.vanillaTabs`).
-Use one or the other, never both on the same page:
+Use the copies in the project (see above). Paths below are relative to the copied files - adjust them.
 
 ```html
+<link rel="stylesheet" href="./vanilla-tabs.css" />
 <script type="module">
-  import vanillaTabs from "https://stopsopa.github.io/tabs/vanilla-tabs.esm.js?vanilla-tabs-autoenable";
+  import vanillaTabs from "./vanilla-tabs.esm.js?vanilla-tabs-autoenable";
 </script>
 ```
+
+Older setups (classic script, put it at the end of `<body>`, it reads `document.body` immediately):
+
+```html
+<script src="./vanilla-tabs.js?vanilla-tabs-autoenable"></script>
+```
+
+- `?vanilla-tabs-autoenable` turns on click handling, activates all tabs present and watches the DOM for
+  tabs added later. For the classic script `<body class="vanilla-tabs-autoenable">` has the same effect.
+  With a bundler the query string cannot be used - call `vanillaTabs.autoenable()` yourself.
+- Both files also define `window.vanillaTabs`; the ESM one additionally exports it (default and named `vanillaTabs`).
+- The files are generated from `vanilla-tabs.ts` in https://github.com/stopsopa/tabs - never edit the `.js` / `.esm.js` files.
+- Only if copying is impossible (no place for local files), load from the CDN:
+  `https://stopsopa.github.io/tabs/skills/vanilla-tabs/vanilla-tabs.{css,js,esm.js}` (latest).
+  Pinned versions `https://cdn.jsdelivr.net/gh/stopsopa/tabs@<tag>/vanilla-tabs.{css,js}` lack colors via
+  variables/attributes, overflow arrows, the `vanilla-tabs:change` event and `vanillaTabs.on()` (they exist only in versions newer than `v1.0.1`).
 
 ## 2. Markup
 
@@ -103,7 +134,7 @@ is dispatched on the panel element and bubbles. `event.detail` is `{ parent, but
 `parent` - the `[data-vanilla-tabs]` element, `button` - the button, `tab` - the panel, `index` - zero based.
 It is not fired again when the already active tab is clicked.
 
-Global listener - covers all tabs, also created later. Register it **before** the `vanilla-tabs.js` script tag,
+Global listener - covers all tabs, also created later. Register it **before** the script loading the library,
 otherwise events of initially active tabs are missed:
 
 ```html
@@ -118,7 +149,7 @@ otherwise events of initially active tabs are missed:
     }
   });
 </script>
-<script src="https://stopsopa.github.io/tabs/vanilla-tabs.js?vanilla-tabs-autoenable"></script>
+<script src="./vanilla-tabs.js?vanilla-tabs-autoenable"></script>
 ```
 
 Listener bound to one tabs element - it lives on that element, so it is destroyed together with the element when

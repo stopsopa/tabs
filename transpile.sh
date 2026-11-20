@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Transpiles vanilla-tabs.ts using esbuild to:
-#   vanilla-tabs.js      - classic <script src="vanilla-tabs.js"> defining window.vanillaTabs
-#   vanilla-tabs.esm.js  - ES module: import vanillaTabs from "./vanilla-tabs.esm.js"
+#   skills/vanilla-tabs/vanilla-tabs.js      - classic <script src="vanilla-tabs.js"> defining window.vanillaTabs
+#   skills/vanilla-tabs/vanilla-tabs.esm.js  - ES module: import vanillaTabs from "./vanilla-tabs.esm.js"
 #
 #   npm install
 #   /bin/bash transpile.sh
@@ -38,13 +38,13 @@ export { vanillaTabs };
 export default vanillaTabs;'
 
 "${ESBUILD}" vanilla-tabs.ts \
-  --outfile=vanilla-tabs.js \
+  --outfile=skills/vanilla-tabs/vanilla-tabs.js \
   --target=es2020 \
   --charset=utf8 \
   --banner:js="${BANNER}"
 
 "${ESBUILD}" vanilla-tabs.ts \
-  --outfile=vanilla-tabs.esm.js \
+  --outfile=skills/vanilla-tabs/vanilla-tabs.esm.js \
   --target=es2020 \
   --charset=utf8 \
   --banner:js="${BANNER}" \
