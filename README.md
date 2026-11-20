@@ -132,7 +132,28 @@ and you don't use watch mode, call `vanillaTabs.updateOverflow(element)` afterwa
 
 [skills/vanilla-tabs/SKILL.md](skills/vanilla-tabs/SKILL.md) is a standard agent skill explaining to AI how to use this library.
 The directory also contains the generated `vanilla-tabs.css`, `vanilla-tabs.esm.js` and `vanilla-tabs.js`; the skill instructs the agent to copy them into your project and use them from there.
-Copy `skills/vanilla-tabs` directory to the skills directory of your agent (for Claude Code: `.claude/skills/` in your project or `~/.claude/skills/`).
+
+## Install the skill
+
+Repository: https://github.com/stopsopa/tabs - the skill is the `skills/vanilla-tabs` directory.
+
+Easiest, with the [skills CLI](https://github.com/vercel-labs/skills) (works for Claude Code and other agents):
+
+```bash
+npx skills add stopsopa/tabs
+```
+
+Manually for Claude Code (use `~/.claude/skills/` instead of `.claude/skills/` to install it for all projects):
+
+```bash
+git clone --depth 1 https://github.com/stopsopa/tabs.git /tmp/stopsopa-tabs
+mkdir -p .claude/skills
+cp -R /tmp/stopsopa-tabs/skills/vanilla-tabs .claude/skills/
+rm -rf /tmp/stopsopa-tabs
+```
+
+For other agents copy the `skills/vanilla-tabs` directory to the place where that agent looks for skills.
+After that ask the agent for tabs on your page - it will copy `vanilla-tabs.css` and the JS file into your project.
 
 # Dev notes
 
