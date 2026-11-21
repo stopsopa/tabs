@@ -1,6 +1,3 @@
-
-
-
 # Preview
 
 ![ScreenShot](tabs.gif)
@@ -61,20 +58,14 @@ Note: before the files moved to `skills/vanilla-tabs/` they were served from `ht
 ### v1.0.0
 
 ```html
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.0/vanilla-tabs.css"
-/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.0/vanilla-tabs.css" />
 <script src="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.0/vanilla-tabs.js"></script>
 ```
 
 ### v1.0.1
 
 ```html
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.1/vanilla-tabs.css"
-/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.1/vanilla-tabs.css" />
 <script src="https://cdn.jsdelivr.net/gh/stopsopa/tabs@v1.0.1/vanilla-tabs.js?vanilla-tabs-autoenable"></script>
 ```
 
@@ -95,9 +86,7 @@ Tabs are transparent by default. Background and lines color are css variables:
 <div data-vanilla-tabs style="--vanilla-tabs-background-color: white">...</div>
 
 <!-- single instance via attributes (applied by js) -->
-<div data-vanilla-tabs data-background-color="white" data-lines-color="navy">
-  ...
-</div>
+<div data-vanilla-tabs data-background-color="white" data-lines-color="navy">...</div>
 ```
 
 # Events

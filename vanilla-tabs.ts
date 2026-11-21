@@ -5,11 +5,7 @@
  *   /bin/bash transpile.sh
  */
 
-type VanillaTabsOnChange = (data: {
-  button: Element;
-  tab: Element;
-  index: number;
-}) => void;
+type VanillaTabsOnChange = (data: { button: Element; tab: Element; index: number }) => void;
 
 /**
  * Every time tab becomes visible (including first activation on init) CustomEvent
@@ -41,17 +37,9 @@ interface VanillaTabs {
   getNewId(): string;
   produceId(parent: Element): string;
   active(opt?: { onChange?: VanillaTabsOnChange }): string[];
-  activeByButtonElement(
-    parent: Element,
-    target: Element,
-    extra?: VanillaTabsExtra
-  ): string;
+  activeByButtonElement(parent: Element, target: Element, extra?: VanillaTabsExtra): string;
   bindOnChange(id: string, onChange?: VanillaTabsOnChange): void;
-  activeByIndex(
-    parent: Element,
-    zeroIndex?: number,
-    extra?: VanillaTabsExtra
-  ): string;
+  activeByIndex(parent: Element, zeroIndex?: number, extra?: VanillaTabsExtra): string;
   /**
    * Returns unbind function, or the tool itself if it was already bound
    */
@@ -62,10 +50,7 @@ interface VanillaTabs {
    * so once element is removed from DOM listener is gone together with it.
    * Returns function to unbind manually.
    */
-  on(
-    parent: Element,
-    callback: (detail: VanillaTabsChangeDetail, event: Event) => void
-  ): VanillaTabsUnbind;
+  on(parent: Element, callback: (detail: VanillaTabsChangeDetail, event: Event) => void): VanillaTabsUnbind;
   watchMutationsEnable(): void;
   watchMutationsDisable(): void;
   /**
@@ -98,8 +83,7 @@ window.vanillaTabs = (function (): VanillaTabs {
     }
   })();
 
-  const th = (msg: string, ..._context: unknown[]) =>
-    new Error(`vanilla-tabs error: ${msg}`);
+  const th = (msg: string, ..._context: unknown[]) => new Error(`vanilla-tabs error: ${msg}`);
 
   function isObjectLike(value: unknown): boolean {
     return value != null && typeof value == "object";
@@ -133,9 +117,7 @@ window.vanillaTabs = (function (): VanillaTabs {
      *  - prev/next arrows for the case when buttons don't fit in available width
      */
     setup: function (parent) {
-      const buttons = parent.querySelector<HTMLElement>(
-        ":scope > [data-buttons]"
-      );
+      const buttons = parent.querySelector<HTMLElement>(":scope > [data-buttons]");
 
       if (!buttons) {
         return;
@@ -205,9 +187,7 @@ window.vanillaTabs = (function (): VanillaTabs {
      * Call it manually if you change buttons and you don't use watchMutationsEnable()
      */
     updateOverflow: function (parent) {
-      const buttons = parent.querySelector<HTMLElement>(
-        ":scope > [data-buttons]"
-      );
+      const buttons = parent.querySelector<HTMLElement>(":scope > [data-buttons]");
 
       if (!buttons) {
         return;
@@ -229,13 +209,9 @@ window.vanillaTabs = (function (): VanillaTabs {
 
       const max = buttons.scrollWidth - buttons.clientWidth;
 
-      const prev = parent.querySelector<HTMLButtonElement>(
-        ':scope > [data-vanilla-tabs-nav="prev"]'
-      );
+      const prev = parent.querySelector<HTMLButtonElement>(':scope > [data-vanilla-tabs-nav="prev"]');
 
-      const next = parent.querySelector<HTMLButtonElement>(
-        ':scope > [data-vanilla-tabs-nav="next"]'
-      );
+      const next = parent.querySelector<HTMLButtonElement>(':scope > [data-vanilla-tabs-nav="next"]');
 
       if (prev) {
         prev.disabled = buttons.scrollLeft <= 1;
@@ -301,10 +277,7 @@ window.vanillaTabs = (function (): VanillaTabs {
             return null;
           }
 
-          return (
-            buttons.querySelector(":scope > .active") ||
-            buttons.querySelector(":scope > *")
-          );
+          return buttons.querySelector(":scope > .active") || buttons.querySelector(":scope > *");
         })
         .forEach((target) => {
           const parent = target?.parentElement?.parentElement;
@@ -369,13 +342,7 @@ window.vanillaTabs = (function (): VanillaTabs {
         throw th(`buttons and tabs length mismatch`, parent);
       }
 
-      if (
-        !(
-          Number.isInteger(zeroIndex) &&
-          !Number.isNaN(zeroIndex) &&
-          zeroIndex > -1
-        )
-      ) {
+      if (!(Number.isInteger(zeroIndex) && !Number.isNaN(zeroIndex) && zeroIndex > -1)) {
         throw th(`zeroIndex not found`, zeroIndex, parent);
       }
 
@@ -386,9 +353,7 @@ window.vanillaTabs = (function (): VanillaTabs {
 
         buttons.forEach(function (button, i) {
           if (i === zeroIndex) {
-            const changed =
-              !button.classList.contains("active") ||
-              !list[i].classList.contains("active");
+            const changed = !button.classList.contains("active") || !list[i].classList.contains("active");
 
             button.classList.add("active");
 
@@ -404,9 +369,7 @@ window.vanillaTabs = (function (): VanillaTabs {
                 index: i,
               };
 
-              list[i].dispatchEvent(
-                new CustomEvent(changeEventName, { bubbles: true, detail })
-              );
+              list[i].dispatchEvent(new CustomEvent(changeEventName, { bubbles: true, detail }));
             }
 
             if (onChange) {
@@ -442,18 +405,13 @@ window.vanillaTabs = (function (): VanillaTabs {
           return;
         }
 
-        const nav = target.closest(
-          "[data-vanilla-tabs] > [data-vanilla-tabs-nav]"
-        );
+        const nav = target.closest("[data-vanilla-tabs] > [data-vanilla-tabs-nav]");
 
         if (nav) {
-          const buttons = nav.parentElement?.querySelector(
-            ":scope > [data-buttons]"
-          );
+          const buttons = nav.parentElement?.querySelector(":scope > [data-buttons]");
 
           if (buttons) {
-            const direction =
-              nav.getAttribute("data-vanilla-tabs-nav") === "prev" ? -1 : 1;
+            const direction = nav.getAttribute("data-vanilla-tabs-nav") === "prev" ? -1 : 1;
 
             buttons.scrollBy({
               left: direction * Math.max(buttons.clientWidth * 0.7, 50),
@@ -464,9 +422,7 @@ window.vanillaTabs = (function (): VanillaTabs {
           return;
         }
 
-        const match = target.matches(
-          "[data-vanilla-tabs] > [data-buttons] > *"
-        );
+        const match = target.matches("[data-vanilla-tabs] > [data-buttons] > *");
 
         const parent = target.parentElement?.parentElement;
 
@@ -516,8 +472,7 @@ window.vanillaTabs = (function (): VanillaTabs {
             return Array.from(mutation.addedNodes).some(function (node) {
               return (
                 node instanceof Element &&
-                (node.matches("[data-buttons]") ||
-                  Boolean(node.querySelector("[data-buttons]")))
+                (node.matches("[data-buttons]") || Boolean(node.querySelector("[data-buttons]")))
               );
             });
           }

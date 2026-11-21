@@ -4,7 +4,9 @@
   "description": "Another js tab component",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "transpile": "/bin/bash transpile.sh"
+    "transpile": "/bin/bash transpile.sh",
+    "style:check": "prettier --config prettier.config.cjs --check .",
+    "style:fix": "prettier --config prettier.config.cjs --write ."
   },
   "repository": {
     "type": "git",
@@ -21,6 +23,7 @@
   },
   "homepage": "https://github.com/stopsopa/tabs#readme",
   "devDependencies": {
-    "esbuild": "^0.28.2"
+    "esbuild": "^0.28.2",
+    "prettier": "3.10.1"
   }
 }

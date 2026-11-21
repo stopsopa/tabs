@@ -49,3 +49,9 @@ export default vanillaTabs;'
   --charset=utf8 \
   --banner:js="${BANNER}" \
   --footer:js="${ESM_FOOTER}"
+
+# generated files are formatted too, so projects installing this skill and running prettier
+# (printWidth 120, see prettier.config.cjs) don't get them reformatted
+node_modules/.bin/prettier --config prettier.config.cjs --write \
+  skills/vanilla-tabs/vanilla-tabs.js \
+  skills/vanilla-tabs/vanilla-tabs.esm.js
