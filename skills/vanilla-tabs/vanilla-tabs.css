@@ -47,7 +47,11 @@
 [data-vanilla-tabs] > [data-buttons] > * {
   flex: 0 0 auto;
   box-sizing: border-box;
-  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+  font-family:
+    Arial,
+    Helvetica Neue,
+    Helvetica,
+    sans-serif;
   font-size: 15px;
   cursor: pointer;
   color: var(--vanilla-tabs-lines-color, #565656);
@@ -95,7 +99,11 @@
   margin: 0;
   padding: 0 0 2px 0;
   min-width: 38px;
-  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+  font-family:
+    Arial,
+    Helvetica Neue,
+    Helvetica,
+    sans-serif;
   font-size: 26px;
   font-weight: bold;
   line-height: 1;
@@ -117,18 +125,10 @@
   display: block;
 }
 [data-vanilla-tabs] > [data-vanilla-tabs-nav]:hover:not(:disabled) {
-  background-color: color-mix(
-    in srgb,
-    var(--vanilla-tabs-lines-color, #565656) 15%,
-    transparent
-  );
+  background-color: color-mix(in srgb, var(--vanilla-tabs-lines-color, #565656) 15%, transparent);
 }
 [data-vanilla-tabs] > [data-vanilla-tabs-nav]:disabled {
   cursor: default;
   /* fading only the arrow, not the line under it */
-  color: color-mix(
-    in srgb,
-    var(--vanilla-tabs-lines-color, #565656) 30%,
-    transparent
-  );
+  color: color-mix(in srgb, var(--vanilla-tabs-lines-color, #565656) 30%, transparent);
 }

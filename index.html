@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en-US">
   <head>
     <meta charset="UTF-8" />
@@ -13,8 +13,7 @@
       }
       body {
         background-color: antiquewhite;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
-          Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
       }
       @media print {
         github-ribbon {
@@ -22,10 +21,15 @@
         }
       }
     </style>
-    <script src="https://cdn.jsdelivr.net/gh/MarketingPipeline/GitHub-Ribbon-Web-Component/dist/github-ribbon-wc.min.js" defer></script>
+    <script
+      src="https://cdn.jsdelivr.net/gh/MarketingPipeline/GitHub-Ribbon-Web-Component/dist/github-ribbon-wc.min.js"
+      defer
+    ></script>
   </head>
   <body>
-    <github-ribbon link="https://github.com/stopsopa/tabs" type="right" color="#679d2c">Fork me on GitHub</github-ribbon>
+    <github-ribbon link="https://github.com/stopsopa/tabs" type="right" color="#679d2c"
+      >Fork me on GitHub</github-ribbon
+    >
     <div data-vanilla-tabs>
       <div data-buttons>
         <span>1) load script</span>
@@ -77,8 +81,7 @@
         </div>
         <div>
           <alert-box type="warning">
-            This is not needed if vanilla-tabs.js is loaded with
-            ?vanilla-tabs-autoenable
+            This is not needed if vanilla-tabs.js is loaded with ?vanilla-tabs-autoenable
           </alert-box>
           <ace-editor lang="html">
             <script type="ace">
@@ -126,8 +129,8 @@
       <p>
         Colors: transparent by default. Set for all instances with css
         <code>[data-vanilla-tabs] { --vanilla-tabs-background-color: white; }</code>
-        or for single one with <code>style="--vanilla-tabs-background-color: white"</code> or
-        attributes <code>data-background-color="white" data-lines-color="navy"</code>
+        or for single one with <code>style="--vanilla-tabs-background-color: white"</code> or attributes
+        <code>data-background-color="white" data-lines-color="navy"</code>
       </p>
       <div data-vanilla-tabs data-background-color="white" data-lines-color="navy">
         <div data-buttons>
@@ -158,10 +161,9 @@
       <h3>Events - run javascript when tab becomes visible</h3>
       <p>
         Every time tab becomes visible (also the initial one) event
-        <code>vanilla-tabs:change</code> is dispatched on the tab content element and it
-        bubbles, so one listener on <code>document</code> handles all tabs, also those
-        created later. Register it <b>before</b> loading vanilla-tabs.js (when using
-        ?vanilla-tabs-autoenable) if you need to catch initially active tabs too.
+        <code>vanilla-tabs:change</code> is dispatched on the tab content element and it bubbles, so one listener on
+        <code>document</code> handles all tabs, also those created later. Register it <b>before</b> loading
+        vanilla-tabs.js (when using ?vanilla-tabs-autoenable) if you need to catch initially active tabs too.
       </p>
       <ace-editor lang="html">
         <script type="ace">
@@ -189,9 +191,9 @@
         </script>
       </ace-editor>
       <p>
-        Or bind to one particular <code>[data-vanilla-tabs]</code> element. Listener lives on
-        that element, so when element is removed from the page listener is destroyed with it
-        - no cleanup needed. Events from tabs nested inside are ignored.
+        Or bind to one particular <code>[data-vanilla-tabs]</code> element. Listener lives on that element, so when
+        element is removed from the page listener is destroyed with it - no cleanup needed. Events from tabs nested
+        inside are ignored.
       </p>
       <div data-vanilla-tabs>
         <div data-buttons>
@@ -267,68 +269,68 @@
       <p>More tabs than fit - arrows appear:</p>
       <div data-vanilla-tabs>
         <div data-buttons>
-        <span>tab number 1</span>
-        <span>tab number 2</span>
-        <span>tab number 3</span>
-        <span>tab number 4</span>
-        <span>tab number 5</span>
-        <span>tab number 6</span>
-        <span>tab number 7</span>
-        <span>tab number 8</span>
-        <span>tab number 9</span>
-        <span>tab number 10</span>
-        <span>tab number 11</span>
-        <span>tab number 12</span>
-        <span>tab number 13</span>
-        <span>tab number 14</span>
-        <span>tab number 15</span>
-        <span>tab number 16</span>
-        <span>tab number 17</span>
-        <span>tab number 18</span>
-        <span>tab number 19</span>
-        <span>tab number 20</span>
-        <span>tab number 21</span>
-        <span>tab number 22</span>
-        <span>tab number 23</span>
-        <span>tab number 24</span>
-        <span>tab number 25</span>
-        <span>tab number 26</span>
-        <span>tab number 27</span>
-        <span>tab number 28</span>
-        <span>tab number 29</span>
-        <span>tab number 30</span>
+          <span>tab number 1</span>
+          <span>tab number 2</span>
+          <span>tab number 3</span>
+          <span>tab number 4</span>
+          <span>tab number 5</span>
+          <span>tab number 6</span>
+          <span>tab number 7</span>
+          <span>tab number 8</span>
+          <span>tab number 9</span>
+          <span>tab number 10</span>
+          <span>tab number 11</span>
+          <span>tab number 12</span>
+          <span>tab number 13</span>
+          <span>tab number 14</span>
+          <span>tab number 15</span>
+          <span>tab number 16</span>
+          <span>tab number 17</span>
+          <span>tab number 18</span>
+          <span>tab number 19</span>
+          <span>tab number 20</span>
+          <span>tab number 21</span>
+          <span>tab number 22</span>
+          <span>tab number 23</span>
+          <span>tab number 24</span>
+          <span>tab number 25</span>
+          <span>tab number 26</span>
+          <span>tab number 27</span>
+          <span>tab number 28</span>
+          <span>tab number 29</span>
+          <span>tab number 30</span>
         </div>
         <div data-tabs>
-        <div>content 1</div>
-        <div>content 2</div>
-        <div>content 3</div>
-        <div>content 4</div>
-        <div>content 5</div>
-        <div>content 6</div>
-        <div>content 7</div>
-        <div>content 8</div>
-        <div>content 9</div>
-        <div>content 10</div>
-        <div>content 11</div>
-        <div>content 12</div>
-        <div>content 13</div>
-        <div>content 14</div>
-        <div>content 15</div>
-        <div>content 16</div>
-        <div>content 17</div>
-        <div>content 18</div>
-        <div>content 19</div>
-        <div>content 20</div>
-        <div>content 21</div>
-        <div>content 22</div>
-        <div>content 23</div>
-        <div>content 24</div>
-        <div>content 25</div>
-        <div>content 26</div>
-        <div>content 27</div>
-        <div>content 28</div>
-        <div>content 29</div>
-        <div>content 30</div>
+          <div>content 1</div>
+          <div>content 2</div>
+          <div>content 3</div>
+          <div>content 4</div>
+          <div>content 5</div>
+          <div>content 6</div>
+          <div>content 7</div>
+          <div>content 8</div>
+          <div>content 9</div>
+          <div>content 10</div>
+          <div>content 11</div>
+          <div>content 12</div>
+          <div>content 13</div>
+          <div>content 14</div>
+          <div>content 15</div>
+          <div>content 16</div>
+          <div>content 17</div>
+          <div>content 18</div>
+          <div>content 19</div>
+          <div>content 20</div>
+          <div>content 21</div>
+          <div>content 22</div>
+          <div>content 23</div>
+          <div>content 24</div>
+          <div>content 25</div>
+          <div>content 26</div>
+          <div>content 27</div>
+          <div>content 28</div>
+          <div>content 29</div>
+          <div>content 30</div>
         </div>
       </div>
     </div>

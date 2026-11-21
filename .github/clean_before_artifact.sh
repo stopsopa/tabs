@@ -21,7 +21,9 @@ cd "${ROOT}"
 ROOT="$(pwd)"
 
 set -x
-rm -rf xx.cjs
+rm -rf xx.ts
+rm -rf prettier.config.cjs
+rm -rf .prettierignore
 rm -rf .vscode
 rm -rf .github
 rm -rf .env*
