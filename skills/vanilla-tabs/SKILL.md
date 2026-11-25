@@ -10,13 +10,23 @@ No manual initialisation is needed and tabs injected into the page later work au
 
 ## Files shipped with this skill
 
-Files next to this `SKILL.md` which you should normally consider copying into the user's project and using directly:
+Files which you should normally consider copying into the user's project and using directly:
 
 - `vanilla-tabs.css` - styles, always needed
 - `vanilla-tabs.esm.js` - ES module version (preferred, see "Which JS file" below)
 - `vanilla-tabs.js` - classic script version (older setups, see below)
 
 Copy only the JS file you actually need (plus the CSS).
+
+Where to take them from:
+
+- `vanilla-tabs.css` is next to this `SKILL.md`.
+- The two JS files are **generated** from `vanilla-tabs.ts` (the source of truth, next to this `SKILL.md`) and are not stored
+  in the repository of the library, so they might not be next to this file. If the one you need is not here, download it:
+  `https://stopsopa.github.io/tabs/skills/vanilla-tabs/vanilla-tabs.esm.js` or
+  `https://stopsopa.github.io/tabs/skills/vanilla-tabs/vanilla-tabs.js`
+- Only when the project is written in TypeScript and its bundler handles `.ts` files, you can copy `vanilla-tabs.ts` instead
+  and import it (`import vanillaTabs from "./vanilla-tabs.ts"`). It has no query string autoenable: call `vanillaTabs.autoenable()`.
 
 Before copying <FILE>, search the project for it
 (exclude dependencies directories typical to current project setup - like node_modules for node.js).
@@ -58,7 +68,7 @@ Older setups (classic script, put it at the end of `<body>`, it reads `document.
   tabs added later. For the classic script `<body class="vanilla-tabs-autoenable">` has the same effect.
   With a bundler the query string cannot be used - call `vanillaTabs.autoenable()` yourself.
 - Both files also define `window.vanillaTabs`; the ESM one additionally exports it (default and named `vanillaTabs`).
-- The files are generated from `vanilla-tabs.ts` in https://github.com/stopsopa/tabs - never edit the `.js` / `.esm.js` files.
+- The JS files are generated from `vanilla-tabs.ts` (https://github.com/stopsopa/tabs) - never edit the `.js` / `.esm.js` files.
 - Only if copying is impossible (no place for local files), load from the CDN:
   `https://stopsopa.github.io/tabs/skills/vanilla-tabs/vanilla-tabs.{css,js,esm.js}` (latest).
   Pinned versions `https://cdn.jsdelivr.net/gh/stopsopa/tabs@<tag>/vanilla-tabs.{css,js}` lack colors via

@@ -1,8 +1,20 @@
 name: Pipeline
+
+# The only workflow of this repository, one run per push:
+#
+#   every push to master, every PR   test (typecheck, tests, build, prettier)
+#   push to master                   ... and then: github-pages  (GitHub Pages)
+#   push of a tag v*                 ... and then: npm           (publish @stopsopa/tabs to npm)
+#
+# Tags are created with "xx publish" (/bin/bash tag.sh). One time setup of npm: NPM_RELEASE.md
+# WARNING: npm "trusted publisher" is bound to the name of this file (deploy.yaml) - don't rename it.
+
 on:
   push:
     branches:
       - master
+    tags:
+      - "v*"
   pull_request:
   # trigger only for master and PR, commits to branches will be ignored
   # if you wan't to trigger ci/cd for branch then just create PR
@@ -28,7 +40,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
-          node-version: 22.12.0
+          # jsdom (tests) needs 22.13+, the same version as in job "npm"
+          node-version: 24
         #   cache: "yarn"
 
       - name: printenv
@@ -132,11 +145,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Transpile vanilla-tabs.ts -> vanilla-tabs.js
+      # generated files are not in git: the site (index.html) and the npm package get them from here
+      - name: Transpile skills/vanilla-tabs/vanilla-tabs.ts -> vanilla-tabs.js, vanilla-tabs.esm.js next to it
         run: /bin/bash transpile.sh
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests (react component, vanilla module, SSR)
+        run: npm test
+
+      - name: Build npm package (dist/)
+        run: /bin/bash build.sh
 
       - name: Prettier check (run "xx style:fix" or "npm run style:fix" locally to fix)
         run: ./node_modules/.bin/prettier --config prettier.config.cjs --check .
+
+      # other projects still load the library from the old urls (https://stopsopa.github.io/tabs/vanilla-tabs.js)
+      # copies in the old location print console.error telling to switch to skills/vanilla-tabs/
+      - name: Recreate legacy location of the library (with deprecation warning)
+        run: /bin/bash .github/legacy_location.sh
 
       - name: Clean before artifact
         run: /bin/bash .github/clean_before_artifact.sh
@@ -157,6 +185,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-22.04
     needs: test
+    # a tag is not a deployment of the site (and environment github-pages accepts only the default branch)
+    if: github.ref_type != 'tag'
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
@@ -165,3 +195,52 @@ jobs:
           error_count: 3
           # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-of-onworkflow_callsecrets
           # https://github.com/actions/deploy-pages#inputs-
+
+  # Publishing to npm - only for tags, only when tests passed. Version comes from the tag (v1.2.3 -> 1.2.3).
+  #
+  # Authentication (details and one time setup: NPM_RELEASE.md):
+  #   - normally: npm trusted publishing (OIDC, needs "id-token: write"), no secrets at all
+  #   - only for the very first release (trusted publisher can be configured only for existing package):
+  #     secret NPM_TOKEN, when it exists it is used instead
+  npm:
+    runs-on: ubuntu-22.04
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # trusted publishing requires node 22.14+ and npm 11.5.1+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build npm package (dist/)
+        run: /bin/bash build.sh
+
+      - name: Version from the tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          npm version "${VERSION}" --no-git-tag-version --allow-same-version
+          npm pack --dry-run
+
+      - name: Publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          node --version
+          npm --version
+          if [[ -n "${NPM_TOKEN}" ]]; then
+            echo "secret NPM_TOKEN found: publishing with the token"
+            export NODE_AUTH_TOKEN="${NPM_TOKEN}"
+          else
+            echo "no secret NPM_TOKEN: publishing with trusted publishing (OIDC)"
+          fi
+          npm publish --access public

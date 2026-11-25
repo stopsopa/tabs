@@ -1,13 +1,19 @@
 #!/bin/bash
 
-# Transpiles vanilla-tabs.ts using esbuild to:
-#   skills/vanilla-tabs/vanilla-tabs.js      - classic <script src="vanilla-tabs.js"> defining window.vanillaTabs
+# Generates js files from the source of truth skills/vanilla-tabs/vanilla-tabs.ts, next to it, using esbuild:
+#
 #   skills/vanilla-tabs/vanilla-tabs.esm.js  - ES module: import vanillaTabs from "./vanilla-tabs.esm.js"
+#   skills/vanilla-tabs/vanilla-tabs.js      - classic <script src="vanilla-tabs.js"> defining window.vanillaTabs
+#
+# Both are in .gitignore - they exist only after running this script. They are needed by:
+#   - index.html (demo, "xx server" runs this script first)
+#   - github pages (.github/workflows/deploy.yaml runs this script before the deployment)
+#   - npm package (build.sh runs this script and copies them to dist/)
 #
 #   npm install
 #   /bin/bash transpile.sh
 #
-# WARNING: esbuild only strips types, it doesn't check them
+# WARNING: esbuild only strips types, it doesn't check them (for that: npm run typecheck)
 
 set -e
 
@@ -21,37 +27,42 @@ if [ ! -f "${ESBUILD}" ]; then
   exit 1
 fi
 
+SOURCE="skills/vanilla-tabs/vanilla-tabs.ts"
+
 BANNER="/**
  * https://github.com/stopsopa/tabs
  *
  * GENERATED FILE - don't edit. Edit vanilla-tabs.ts and run: /bin/bash transpile.sh
  */"
 
-# ESM version is exactly the same code (it also defines window.vanillaTabs) + export.
-# Classic script detects ?vanilla-tabs-autoenable in src of its <script> tag,
-# for module the equivalent is query string of the import url.
-ESM_FOOTER='const vanillaTabs = window.vanillaTabs;
-if (new URL(import.meta.url).searchParams.has("vanilla-tabs-autoenable")) {
-  vanillaTabs.autoenable();
-}
-export { vanillaTabs };
-export default vanillaTabs;'
+# The ES module is exactly the same code + its exports + one thing which can't exist in the classic script:
+# autoenable triggered by query string of the url the module was imported from
+# (the classic script reads it from src of its <script> tag).
+ESM_FOOTER='if (typeof window !== "undefined" && new URL(import.meta.url).searchParams.has("vanilla-tabs-autoenable")) {
+  window.vanillaTabs.autoenable();
+}'
 
-"${ESBUILD}" vanilla-tabs.ts \
-  --outfile=skills/vanilla-tabs/vanilla-tabs.js \
-  --target=es2020 \
-  --charset=utf8 \
-  --banner:js="${BANNER}"
-
-"${ESBUILD}" vanilla-tabs.ts \
+"${ESBUILD}" "${SOURCE}" \
+  --bundle \
+  --format=esm \
   --outfile=skills/vanilla-tabs/vanilla-tabs.esm.js \
   --target=es2020 \
   --charset=utf8 \
   --banner:js="${BANNER}" \
   --footer:js="${ESM_FOOTER}"
 
-# generated files are formatted too, so projects installing this skill and running prettier
-# (printWidth 120, see prettier.config.cjs) don't get them reformatted
-node_modules/.bin/prettier --config prettier.config.cjs --write \
+# iife: exports are dropped, window.vanillaTabs is defined by the code itself
+"${ESBUILD}" "${SOURCE}" \
+  --bundle \
+  --format=iife \
+  --outfile=skills/vanilla-tabs/vanilla-tabs.js \
+  --target=es2020 \
+  --charset=utf8 \
+  --banner:js="${BANNER}"
+
+# generated files are formatted too, so projects copying them and running prettier
+# (printWidth 120, see prettier.config.cjs) don't get them reformatted.
+# --ignore-path /dev/null: without it prettier skips them, because they are in .gitignore
+node_modules/.bin/prettier --config prettier.config.cjs --ignore-path /dev/null --write \
   skills/vanilla-tabs/vanilla-tabs.js \
   skills/vanilla-tabs/vanilla-tabs.esm.js

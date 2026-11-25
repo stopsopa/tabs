@@ -17,11 +17,15 @@ Current version was rewritten to use vanilla [event delegation](https://develope
 
 # Install
 
-Copy files from [skills/vanilla-tabs](skills/vanilla-tabs) to your project (this is where the generated files live):
+Copy these files to your project:
 
-- `vanilla-tabs.css`
-- `vanilla-tabs.esm.js` - ES module, preferred (native browser ESM and bundlers)
-- `vanilla-tabs.js` - classic script, for older setups
+- [`vanilla-tabs.css`](https://stopsopa.github.io/tabs/skills/vanilla-tabs/vanilla-tabs.css)
+- [`vanilla-tabs.esm.js`](https://stopsopa.github.io/tabs/skills/vanilla-tabs/vanilla-tabs.esm.js) - ES module, preferred (native browser ESM and bundlers)
+- [`vanilla-tabs.js`](https://stopsopa.github.io/tabs/skills/vanilla-tabs/vanilla-tabs.js) - classic script, for older setups
+
+The js files are generated from [`skills/vanilla-tabs/vanilla-tabs.ts`](skills/vanilla-tabs/vanilla-tabs.ts) and are not stored
+in the repository - download them from the links above (or use the npm package, see below). In a TypeScript project you can also
+copy `vanilla-tabs.ts` itself and import it directly.
 
 ```html
 <link rel="stylesheet" href="./vanilla-tabs.css" />
@@ -43,6 +47,61 @@ vanillaTabs.active();
 // will be created anywhere in the document
 vanillaTabs.watchMutationsEnable();
 ```
+
+## npm
+
+```bash
+npm install @stopsopa/tabs
+```
+
+ES module with TypeScript types, works with any bundler (vite, webpack, rollup, esbuild, parcel...):
+
+```ts
+import vanillaTabs, { type VanillaTabs, type VanillaTabsChangeDetail } from "@stopsopa/tabs";
+import "@stopsopa/tabs/vanilla-tabs.css";
+
+// with a bundler there is no ?vanilla-tabs-autoenable in the url, so:
+vanillaTabs.autoenable();
+```
+
+Importing the module without DOM (SSR) is safe, calling its methods is not.
+
+Straight from CDN (replace `1.1.0` with the version you need):
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stopsopa/tabs@1.1.0/dist/vanilla-tabs.css" />
+<script src="https://cdn.jsdelivr.net/npm/@stopsopa/tabs@1.1.0/dist/vanilla-tabs.js?vanilla-tabs-autoenable"></script>
+```
+
+## React
+
+The same package contains a typed React component (React 18+). It is implemented in React (it doesn't run the vanilla
+script), renders the same markup and uses the same stylesheet. Safe for SSR.
+
+```tsx
+import { Tabs, Tab } from "@stopsopa/tabs/react";
+import "@stopsopa/tabs/vanilla-tabs.css";
+
+<Tabs defaultIndex={1} onChange={(index) => console.log(index)} backgroundColor="white" linesColor="navy">
+  <Tab label="first">content of first</Tab>
+  <Tab label={<b>second</b>}>content of second</Tab>
+</Tabs>;
+```
+
+| prop of `<Tabs>`  | type                      | what                                                                  |
+| ----------------- | ------------------------- | --------------------------------------------------------------------- |
+| `defaultIndex`    | `number`                  | initially active tab (uncontrolled mode), default `0`                 |
+| `index`           | `number`                  | active tab (controlled mode) - changes only when the prop changes     |
+| `onChange`        | `(index: number) => void` | user picked another tab (click, Enter, Space)                         |
+| `backgroundColor` | `string`                  | `--vanilla-tabs-background-color`                                     |
+| `linesColor`      | `string`                  | `--vanilla-tabs-lines-color`                                          |
+| anything else     |                           | `className`, `style`, `id`, `data-*`, `ref`... go to the root `<div>` |
+
+`<Tab>`: `label` (content of the button, any node), `children` (content of the panel), other props go to the panel `<div>`.
+`<Tab>` elements have to be direct children of `<Tabs>`. All panels stay mounted, inactive ones are hidden with css.
+Types `TabsProps` and `TabProps` are exported too.
+
+Don't call `vanillaTabs.autoenable()` on a page rendering `<Tabs>` - React handles everything on its own.
 
 ## Latest from github pages (not recommended to use)
 
@@ -120,7 +179,8 @@ and you don't use watch mode, call `vanillaTabs.updateOverflow(element)` afterwa
 # Skill for AI agents
 
 [skills/vanilla-tabs/SKILL.md](skills/vanilla-tabs/SKILL.md) is a standard agent skill explaining to AI how to use this library.
-The directory also contains the generated `vanilla-tabs.css`, `vanilla-tabs.esm.js` and `vanilla-tabs.js`; the skill instructs the agent to copy them into your project and use them from there.
+The directory also contains `vanilla-tabs.css` and the source `vanilla-tabs.ts`; the skill instructs the agent to bring the css and the js file
+(generated from the source, downloaded from github pages when it is not next to the skill) into your project and use them from there.
 
 ## Install the skill
 
@@ -146,12 +206,28 @@ After that ask the agent for tabs on your page - it will copy `vanilla-tabs.css`
 
 # Dev notes
 
-Source is `vanilla-tabs.ts`; `npm run transpile` (or `xx transpile`) generates `skills/vanilla-tabs/vanilla-tabs.js` and `vanilla-tabs.esm.js` - commit them.
+Source of truth is `skills/vanilla-tabs/vanilla-tabs.ts`. `npm run transpile` (or `xx transpile`) generates `vanilla-tabs.js` and `vanilla-tabs.esm.js`
+next to it with esbuild. They are in `.gitignore`: after cloning run `xx transpile` (`xx server` and `xx build` do it on their own),
+github actions generates them for github pages and for the npm package.
 
-To refresh jsdelivr visit: https://purge.jsdelivr.net/gh/stopsopa/tabs@v1.0.1/vanilla-tabs.js
-pointing to version specified by latest tag
+React component: `react/Tabs.tsx`, tests: `test/`.
 
-Inspecting version in jsdelivr: https://www.jsdelivr.com/package/npm/stopsopa.tabs
+| command (`xx <name>` or `npm run <name>`) | what                                                                                         |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `transpile`                               | `skills/vanilla-tabs/vanilla-tabs.ts` -> `vanilla-tabs.js`, `vanilla-tabs.esm.js` next to it |
+| `server` (xx only)                        | transpile + demo on http://localhost:4286                                                    |
+| `typecheck`                               | `tsc` over sources and tests                                                                 |
+| `test`                                    | vitest: React component, vanilla module, SSR                                                 |
+| `build`                                   | content of the npm package in `dist/` (not committed)                                        |
+| `xx publish`                              | new git tag -> github actions publishes `@stopsopa/tabs` to npm                              |
+
+Release process and its one time setup: [NPM_RELEASE.md](NPM_RELEASE.md).
+
+Old urls `https://stopsopa.github.io/tabs/vanilla-tabs.{js,esm.js,css}` (before the files moved to `skills/vanilla-tabs/`)
+are recreated during deployment by `.github/legacy_location.sh`; the js files print a console error asking to switch to the new url.
+
+Inspecting versions in jsdelivr: https://www.jsdelivr.com/package/npm/@stopsopa/tabs
+(versions up to `v1.0.1` were published only as git tags, see "Older versions" above)
 
 ### License
 

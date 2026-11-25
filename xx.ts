@@ -12,15 +12,18 @@
 //   xx <command_name>
 
 type Command = {
-  // shell script, written to xx_generated.sh and executed with /bin/bash
+  // required. Shell script, written to xx_generated.sh and executed with /bin/bash
   command: string;
-  // shown under the menu for selected row. Default: name of the command
+  // default: name of the command. Shown under the menu for the selected row
   description?: string;
-  // default true: ask "Run command?" before running
+  // default: false = run straight away
+  // true = ask "Run command?" first (XX_CONFIRM=false skips the question)
   confirm?: boolean;
-  // default false. true = run in the current shell (source) instead of /bin/bash
+  // default: false = executed with /bin/bash as a separate process
+  // true = sourced in the current shell (cd, export, source venv/bin/activate stay after it ends)
   source?: boolean;
-  // lower goes first. Missing means 0, so negative = top, positive = bottom
+  // default: 0. Lower goes first: negative = top, positive = bottom
+  // commands with the same order stay in the order of this file
   order?: number;
 };
 
@@ -56,6 +59,10 @@ cat <<EEE
   server:
     http://localhost:\${PORT}
 
+  pages:    https://stopsopa.github.io/tabs/
+  npm:      https://www.npmjs.com/package/@stopsopa/tabs
+  release:  xx publish (see NPM_RELEASE.md)
+
 EEE
       `,
       description: "Status of all things",
@@ -63,6 +70,10 @@ EEE
     },
     [`server`]: {
       command: `
+set -e
+${npmInstall}
+# index.html loads skills/vanilla-tabs/vanilla-tabs.js which is generated (not in git)
+/bin/bash transpile.sh
 PORT="4286"
 cat <<EEE
     http://localhost:\${PORT}
@@ -70,6 +81,7 @@ EEE
 read -p "\n      Press enter to continue\n"
 python3 -m http.server \${PORT} --directory .
 `,
+      description: "transpile, then serve the demo (index.html) on http://localhost:4286",
       confirm: false,
     },
     [`transpile`]: {
@@ -78,8 +90,42 @@ set -e
 ${npmInstall}
 /bin/bash transpile.sh
 `,
-      description: "vanilla-tabs.ts -> skills/vanilla-tabs/*.js (esbuild + prettier)",
+      description:
+        "skills/vanilla-tabs/vanilla-tabs.ts (source of truth) -> vanilla-tabs.js + vanilla-tabs.esm.js next to it (generated, not in git)",
       confirm: false,
+    },
+    [`build`]: {
+      command: `
+set -e
+${npmInstall}
+/bin/bash build.sh
+`,
+      description: "transpile, then content of the npm package in dist/ (+ react component + types)",
+    },
+    [`typecheck`]: {
+      command: `
+set -e
+${npmInstall}
+./node_modules/.bin/tsc -p tsconfig.json
+`,
+      description:
+        "tsc: check types of skills/vanilla-tabs/vanilla-tabs.ts, react/ and test/ (the same check runs in CI)",
+    },
+    [`test`]: {
+      command: `
+set -e
+${npmInstall}
+./node_modules/.bin/vitest run "\${@}"
+`,
+      description:
+        "vitest: tests of the react component and of vanilla-tabs.ts (no transpile needed), arguments go to vitest",
+    },
+    [`publish`]: {
+      command: `
+set -e
+/bin/bash tag.sh "\${@}"
+`,
+      description: `create and push new tag (optional argument: patch | minor | major), github actions will publish it to npm, see NPM_RELEASE.md`,
     },
     [`style:check`]: {
       command: `

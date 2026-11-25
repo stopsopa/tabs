@@ -1,29 +1,88 @@
 {
-  "name": "stopsopa.tabs",
-  "version": "1.0.1",
-  "description": "Another js tab component",
+  "name": "@stopsopa/tabs",
+  "version": "0.0.0",
+  "description": "Declarative, dependency free tabs for raw html (vanilla js, ES module, TypeScript types) + React component",
+  "type": "module",
+  "sideEffects": [
+    "./dist/vanilla-tabs.js",
+    "./dist/vanilla-tabs.esm.js",
+    "**/*.css"
+  ],
+  "main": "./dist/vanilla-tabs.esm.js",
+  "module": "./dist/vanilla-tabs.esm.js",
+  "types": "./dist/vanilla-tabs.esm.d.ts",
+  "unpkg": "./dist/vanilla-tabs.js",
+  "jsdelivr": "./dist/vanilla-tabs.js",
+  "exports": {
+    ".": {
+      "types": "./dist/vanilla-tabs.esm.d.ts",
+      "default": "./dist/vanilla-tabs.esm.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "default": "./dist/react/index.js"
+    },
+    "./vanilla-tabs.css": "./dist/vanilla-tabs.css",
+    "./vanilla-tabs.js": "./dist/vanilla-tabs.js",
+    "./vanilla-tabs.esm.js": {
+      "types": "./dist/vanilla-tabs.esm.d.ts",
+      "default": "./dist/vanilla-tabs.esm.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "transpile": "/bin/bash transpile.sh",
+    "build": "/bin/bash build.sh",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
     "style:check": "prettier --config prettier.config.cjs --check .",
     "style:fix": "prettier --config prettier.config.cjs --write ."
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:stopsopa/tabs.git"
+    "url": "git+https://github.com/stopsopa/tabs.git"
   },
   "keywords": [
-    "jquery",
-    "tabs"
+    "tabs",
+    "vanilla",
+    "vanilla-js",
+    "esm",
+    "typescript",
+    "react",
+    "react-component",
+    "no-dependencies"
   ],
   "author": "Szymon Działowski",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/stopsopa/tabs/issues"
   },
-  "homepage": "https://github.com/stopsopa/tabs#readme",
+  "homepage": "https://stopsopa.github.io/tabs/",
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@testing-library/dom": "10.4.2",
+    "@testing-library/react": "16.3.3",
+    "@types/react": "19.3.2",
+    "@types/react-dom": "19.3.0",
     "esbuild": "^0.28.2",
-    "prettier": "3.10.1"
+    "jsdom": "29.1.1",
+    "prettier": "3.10.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "typescript": "7.0.2",
+    "vitest": "5.1.2"
   }
 }
