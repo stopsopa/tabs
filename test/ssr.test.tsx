@@ -9,7 +9,7 @@
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { Tab, Tabs } from "../react/index.js";
+import { Tab, Tabs } from "../skills/vanilla-tabs/Tabs.tsx";
 import vanillaTabs from "../skills/vanilla-tabs/vanilla-tabs.ts";
 
 describe("without DOM", () => {

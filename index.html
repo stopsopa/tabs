@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <title>tabs by Szymon Działowski</title>
-    <link rel="icon" href="favicon.ico" type="image/x-icon" />
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- no favicon: stops the browser from requesting /favicon.ico -->
+    <link rel="icon" href="data:," />
 
     <link rel="stylesheet" href="skills/vanilla-tabs/vanilla-tabs.css" />
     <style>
@@ -30,21 +31,25 @@
     <github-ribbon link="https://github.com/stopsopa/tabs" type="right" color="#679d2c"
       >Fork me on GitHub</github-ribbon
     >
+    <p><b>vanilla version</b> (this page) | <a href="demo/react/index.html">React component - demo ›</a></p>
     <div data-vanilla-tabs>
       <div data-buttons>
         <span>1) load script</span>
-        <a href="javascript:;">2) then use tags</a>
+        <span>2) then use tags</span>
         <span>then run code (optional)</span>
         <span>the result will be </span>
       </div>
       <div data-tabs>
         <div>
-          <ace-editor lang="javascript">
+          <ace-editor lang="html">
             <script type="ace">
-              // copy files vanilla-tabs.css and vanilla-tabs.js
-              // from: https://github.com/stopsopa/tabs/tree/master/skills/vanilla-tabs
-              // and add them to your project
-              // and then load to your html page
+              <!--
+                copy files vanilla-tabs.css and vanilla-tabs.js
+                from: https://stopsopa.github.io/tabs/skills/vanilla-tabs/vanilla-tabs.css
+                      https://stopsopa.github.io/tabs/skills/vanilla-tabs/vanilla-tabs.js
+                and add them to your project
+                and then load to your html page
+              -->
               <link rel="stylesheet" href="vanilla-tabs.css" />
               and
               <script src="vanilla-tabs.js?vanilla-tabs-autoenable">&lt;/script>
@@ -56,7 +61,7 @@
             <script type="ace">
               <div data-vanilla-tabs>
                   <div data-buttons>
-                      <a href="javascript:;">html</a>
+                      <button type="button">html</button>
                       <span class="active">javascript</span>
                       <span>result</span>
                   </div>
@@ -67,7 +72,7 @@
                       <div>
                           my stuff for tab 2
                           <br />
-                          <img src="https://github.com/user-attachments/assets/bdbd4da2-5b56-46ae-892b-3c92e0f6ff2f" width="110" /&gt
+                          <img src="https://github.com/user-attachments/assets/bdbd4da2-5b56-46ae-892b-3c92e0f6ff2f" width="110" />
                       </div>
                       <div>
                           my stuff for tab 3
@@ -98,7 +103,7 @@
         <div>
           <div data-vanilla-tabs>
             <div data-buttons>
-              <a href="javascript:;">html</a>
+              <button type="button">html</button>
               <span class="active">javascript</span>
               <span>result</span>
             </div>
@@ -173,7 +178,8 @@
               // button - clicked element from [data-buttons]
               // tab    - element from [data-tabs] which just became visible
               // index  - zero based index of the tab
-              const { parent, button, tab, index } = e.detail;
+              // previousIndex - index of the tab visible before (-1 for the initial one)
+              const { parent, button, tab, index, previousIndex } = e.detail;
 
               // run something every time particular tab is shown
               if (tab.matches("#stats")) {
@@ -266,8 +272,53 @@
     </div>
 
     <div class="spacer">
+      <h3>Keyboard, stopping the change, switching from code</h3>
+      <p>
+        Focus a tab (Tab key) and use <kbd>←</kbd> <kbd>→</kbd> <kbd>Home</kbd> <kbd>End</kbd>, <kbd>Enter</kbd> /
+        <kbd>Space</kbd>. Before a change made by the user (click, keyboard) cancelable event
+        <code>vanilla-tabs:before-change</code> is dispatched - <code>preventDefault()</code> keeps current tab. Changes
+        made from code are never stopped.
+      </p>
+      <ace-editor lang="html">
+        <script type="ace">
+          <script>
+            document.addEventListener("vanilla-tabs:before-change", function (e) {
+              // the same detail as in vanilla-tabs:change - "index" is the tab the user wants to open
+              const { parent, button, tab, index, previousIndex } = e.detail;
+
+              if (parent.id === "guard-demo" && document.querySelector("#guard").checked) {
+                e.preventDefault();
+              }
+            });
+
+            // from code (zero based index), not affected by the listener above:
+            vanillaTabs.activeByIndex(document.querySelector("#guard-demo"), 2);
+          &lt;/script>
+        </script>
+      </ace-editor>
+      <p>
+        <label><input type="checkbox" id="guard" /> stop the user from leaving current tab</label>
+        <button type="button" class="go" data-index="0">activeByIndex(el, 0)</button>
+        <button type="button" class="go" data-index="1">activeByIndex(el, 1)</button>
+        <button type="button" class="go" data-index="2">activeByIndex(el, 2)</button>
+      </p>
+      <div data-vanilla-tabs id="guard-demo" data-background-color="white">
+        <div data-buttons>
+          <span>form</span>
+          <span>preview</span>
+          <button type="button">a &lt;button&gt; <b>with nested element</b></button>
+        </div>
+        <div data-tabs>
+          <div>form</div>
+          <div>preview</div>
+          <div>buttons can be any element, clicks on elements nested in them work too</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer">
       <p>More tabs than fit - arrows appear:</p>
-      <div data-vanilla-tabs>
+      <div data-vanilla-tabs id="overflow-demo">
         <div data-buttons>
           <span>tab number 1</span>
           <span>tab number 2</span>
@@ -338,13 +389,13 @@
     <script>
       // registered before vanilla-tabs.js to catch also initially active tabs
       document.addEventListener("vanilla-tabs:change", function (e) {
-        const { parent, button, tab, index } = e.detail;
+        const { parent, button, tab, index, previousIndex } = e.detail;
 
         if (parent.id !== "events-demo") return;
 
         const log = document.querySelector("#events-log");
 
-        log.textContent += `vanilla-tabs:change index: ${index}, button: "${button.innerText}"\n`;
+        log.textContent += `vanilla-tabs:change index: ${index}, previousIndex: ${previousIndex}, button: "${button.innerText}"\n`;
 
         log.scrollTop = log.scrollHeight;
 
@@ -364,6 +415,18 @@
     <script src="skills/vanilla-tabs/vanilla-tabs.js?vanilla-tabs-autoenable"></script>
 
     <script>
+      document.addEventListener("vanilla-tabs:before-change", function (e) {
+        if (e.detail.parent.id === "guard-demo" && document.querySelector("#guard").checked) {
+          e.preventDefault();
+        }
+      });
+
+      document.addEventListener("click", function (e) {
+        if (e.target.matches(".go")) {
+          vanillaTabs.activeByIndex(document.querySelector("#guard-demo"), Number(e.target.dataset.index));
+        }
+      });
+
       {
         let i = 0;
         document.body.addEventListener("click", function (e) {
@@ -403,7 +466,7 @@
           container.innerHTML = `
           <div data-vanilla-tabs>
     <div data-buttons>
-        <a href="javascript:;">first tab ${i}</a>
+        <button type="button">first tab ${i}</button>
         <span class="active">javascript</span>
         <span>result</span>
     </div>

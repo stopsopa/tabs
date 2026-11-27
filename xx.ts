@@ -59,9 +59,13 @@ cat <<EEE
   server:
     http://localhost:\${PORT}
 
+      vanilla demo:  /index.html
+      react demo:    /demo/react/index.html
+
   pages:    https://stopsopa.github.io/tabs/
-  npm:      https://www.npmjs.com/package/@stopsopa/tabs
-  release:  xx publish (see NPM_RELEASE.md)
+            https://stopsopa.github.io/tabs/demo/react/
+
+  release:  there is none - push to master deploys github pages, projects copy the files from there (README.md)
 
 EEE
       `,
@@ -77,11 +81,29 @@ ${npmInstall}
 PORT="4286"
 cat <<EEE
     http://localhost:\${PORT}
+    http://localhost:\${PORT}/demo/react/index.html
 EEE
-read -p "\n      Press enter to continue\n"
 python3 -m http.server \${PORT} --directory .
 `,
-      description: "transpile, then serve the demo (index.html) on http://localhost:4286",
+      description: "transpile, then serve the demos (index.html, demo/react/index.html) on http://localhost:4286",
+      confirm: false,
+    },
+    [`watch`]: {
+      command: `
+set -e
+${npmInstall}
+PORT="4286"
+cat <<EEE
+    http://localhost:\${PORT}
+    http://localhost:\${PORT}/demo/react/index.html
+EEE
+# both end with Ctrl+C
+trap 'kill 0' EXIT
+/bin/bash transpile.sh --watch &
+python3 -m http.server \${PORT} --directory . &
+wait
+`,
+      description: "like server, but generated files are rebuilt on every change of the sources (reload the page)",
       confirm: false,
     },
     [`transpile`]: {
@@ -91,16 +113,8 @@ ${npmInstall}
 /bin/bash transpile.sh
 `,
       description:
-        "skills/vanilla-tabs/vanilla-tabs.ts (source of truth) -> vanilla-tabs.js + vanilla-tabs.esm.js next to it (generated, not in git)",
+        "skills/vanilla-tabs/vanilla-tabs.ts (source of truth) -> vanilla-tabs.js + vanilla-tabs.esm.js next to it, demo/react/main.tsx -> main.js (generated, not in git)",
       confirm: false,
-    },
-    [`build`]: {
-      command: `
-set -e
-${npmInstall}
-/bin/bash build.sh
-`,
-      description: "transpile, then content of the npm package in dist/ (+ react component + types)",
     },
     [`typecheck`]: {
       command: `
@@ -109,7 +123,7 @@ ${npmInstall}
 ./node_modules/.bin/tsc -p tsconfig.json
 `,
       description:
-        "tsc: check types of skills/vanilla-tabs/vanilla-tabs.ts, react/ and test/ (the same check runs in CI)",
+        "tsc: check types of skills/vanilla-tabs/ (vanilla-tabs.ts, Tabs.tsx), demo/, test/ and e2e/ (the same check runs in CI)",
     },
     [`test`]: {
       command: `
@@ -118,14 +132,18 @@ ${npmInstall}
 ./node_modules/.bin/vitest run "\${@}"
 `,
       description:
-        "vitest: tests of the react component and of vanilla-tabs.ts (no transpile needed), arguments go to vitest",
+        "vitest (jsdom): tests of vanilla-tabs.ts, of generated files and of the react component, arguments go to vitest",
     },
-    [`publish`]: {
+    [`e2e`]: {
       command: `
 set -e
-/bin/bash tag.sh "\${@}"
+${npmInstall}
+# does nothing when the browser is already there
+./node_modules/.bin/playwright install chromium
+./node_modules/.bin/playwright test "\${@}"
 `,
-      description: `create and push new tag (optional argument: patch | minor | major), github actions will publish it to npm, see NPM_RELEASE.md`,
+      description:
+        "playwright: mouse, keyboard and api on both demo pages in real chromium (starts its own server on port 4287), arguments go to playwright (--ui, --headed, -g ...)",
     },
     [`style:check`]: {
       command: `

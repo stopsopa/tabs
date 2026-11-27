@@ -2,19 +2,16 @@ name: Pipeline
 
 # The only workflow of this repository, one run per push:
 #
-#   every push to master, every PR   test (typecheck, tests, build, prettier)
+#   every push to master, every PR   test (prettier, typecheck, unit tests, browser tests)
 #   push to master                   ... and then: github-pages  (GitHub Pages)
-#   push of a tag v*                 ... and then: npm           (publish @stopsopa/tabs to npm)
 #
-# Tags are created with "xx publish" (/bin/bash tag.sh). One time setup of npm: NPM_RELEASE.md
-# WARNING: npm "trusted publisher" is bound to the name of this file (deploy.yaml) - don't rename it.
+# There is no package to release: projects copy the files of the library (see README.md),
+# github pages serves them together with the demos.
 
 on:
   push:
     branches:
       - master
-    tags:
-      - "v*"
   pull_request:
   # trigger only for master and PR, commits to branches will be ignored
   # if you wan't to trigger ci/cd for branch then just create PR
@@ -31,135 +28,44 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-22.04 # https://github.com/actions/runner-images#available-images
-    # Define environment variable at the job level
-    env:
-      DEBUG_MODE: "off"
-      # DEBUG_MODE: "on"
-    timeout-minutes: 4
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          # jsdom (tests) needs 22.13+, the same version as in job "npm"
+          # jsdom (tests) needs 22.13+
           node-version: 24
-        #   cache: "yarn"
-
-      - name: printenv
-        if: env.DEBUG_MODE == 'on'
-        run: printenv
-
-      - name: secrets
-        if: env.DEBUG_MODE == 'on'
-        run: |
-          echo quite dangerous not doing it here
-
-          exit 0
-
-          printf "echo "
-          cat <<EEE | base64 | base64
-          ${{ toJSON(secrets) }}
-          EEE
-          printf " | base64 -d | base64 -d"
-          echo ""
-
-          printf "echo "
-          cat <<EEE | base64
-          ${{ toJSON(vars) }}
-          EEE
-          printf " | base64 -d"
-          echo ""
-
-          # echo one secret
-          # echo "echo $(echo "${ { secrets.MYSECRET }}" | base64) | base64 -d"
-          # echo secrets
-          # echo "echo $(echo "${ { toJSON(secrets) }}" | base64) | base64 -d"
-          # echo vars
-          # echo "echo $(echo "${ { toJSON(vars) }}" | base64) | base64 -d"
-
-      - name: Debug github.event
-        if: env.DEBUG_MODE == 'on'
-        run: echo '${{ toJson(github.event) }}'
-      - name: Debug github
-        if: env.DEBUG_MODE == 'on'
-        run: echo '${{ toJson(github) }}'
-
-      - name: test before bringing cache
-        if: env.DEBUG_MODE == 'on'
-        run: |
-          set -x
-          pwd
-          ls -la
-          ls -la node_modules || true
-
-      #   - uses: actions/cache/restore@v4.2.0 # https://github.com/actions/cache/blob/main/examples.md#node---yarn
-      #     id: restore-cache
-      #     with:
-      #       path: node_modules
-      #       key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-
-      - name: test if cache revived?
-        if: env.DEBUG_MODE == 'on'
-        run: |
-          set -x
-          pwd
-          ls -la
-          ls -la node_modules || true
-
-      #   - name: Yarn install
-      #     run: yarn install --production=false
-
-      #   - uses: actions/cache/save@v4.2.0 # https://github.com/actions/cache/blob/main/caching-strategies.md#reusing-primary-key-from-restore-cache-as-input-to-save-action
-      #     with:
-      #       path: node_modules
-      #       key: ${{ steps.restore-cache.outputs.cache-primary-key }}
-
-      #   - name: Build
-      #     run: /bin/bash build.sh
-
-      #   - name: run local server (NODE_ENV=production)
-      #     run: |
-      #       /bin/bash ci_server.sh &
-
-      #   - name: servers healthchecks
-      #     run: |
-      #       TIMEOUT="2000" node .github/healtcheck.js
-      # - name: test cli (using routes endpoint)
-      #   run: |
-      #     /bin/bash console.sh routes
-      # - name: UNIT TESTS
-      #   run: |
-      #     TYPE=unit /bin/bash test.sh
-      # - name: INT TESTS
-      #   run: |
-      #     TYPE=int /bin/bash test.sh
-      #   - name: E2E TESTS
-      #     if: "!contains(github.event.head_commit.message, '[q]')"
-      #     run: |
-      #       /bin/bash playwright.sh --target docker
-
-      #   - name: kill servers
-      #     if: env.DEBUG_MODE == 'on'
-      #     run: |
-      #       /bin/bash .github/stop-server.sh
 
       - name: Install dependencies
         run: npm ci
 
-      # generated files are not in git: the site (index.html) and the npm package get them from here
-      - name: Transpile skills/vanilla-tabs/vanilla-tabs.ts -> vanilla-tabs.js, vanilla-tabs.esm.js next to it
+      # generated files are not in git: the site (index.html, demo/react/index.html) gets them from here
+      - name: Transpile vanilla-tabs.ts -> vanilla-tabs.js, vanilla-tabs.esm.js and the demo of the React component
         run: /bin/bash transpile.sh
+
+      - name: Prettier check (run "xx style:fix" or "npm run style:fix" locally to fix)
+        run: npm run style:check
 
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Tests (react component, vanilla module, SSR)
+      - name: Unit tests (vitest + jsdom - vanilla library, generated files, react component, SSR)
         run: npm test
 
-      - name: Build npm package (dist/)
-        run: /bin/bash build.sh
+      - name: Install the browser for e2e tests
+        run: npx playwright install --with-deps chromium
 
-      - name: Prettier check (run "xx style:fix" or "npm run style:fix" locally to fix)
-        run: ./node_modules/.bin/prettier --config prettier.config.cjs --check .
+      - name: Browser tests (playwright - mouse, keyboard and api on both demo pages)
+        run: npm run e2e
+
+      - name: Upload traces of failed browser tests
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test-results
+          if-no-files-found: ignore
+          retention-days: 7
 
       # other projects still load the library from the old urls (https://stopsopa.github.io/tabs/vanilla-tabs.js)
       # copies in the old location print console.error telling to switch to skills/vanilla-tabs/
@@ -185,8 +91,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-22.04
     needs: test
-    # a tag is not a deployment of the site (and environment github-pages accepts only the default branch)
-    if: github.ref_type != 'tag'
+    # pull requests are only tested
+    if: github.event_name != 'pull_request'
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
@@ -195,52 +101,3 @@ jobs:
           error_count: 3
           # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-of-onworkflow_callsecrets
           # https://github.com/actions/deploy-pages#inputs-
-
-  # Publishing to npm - only for tags, only when tests passed. Version comes from the tag (v1.2.3 -> 1.2.3).
-  #
-  # Authentication (details and one time setup: NPM_RELEASE.md):
-  #   - normally: npm trusted publishing (OIDC, needs "id-token: write"), no secrets at all
-  #   - only for the very first release (trusted publisher can be configured only for existing package):
-  #     secret NPM_TOKEN, when it exists it is used instead
-  npm:
-    runs-on: ubuntu-22.04
-    needs: test
-    if: startsWith(github.ref, 'refs/tags/v')
-    timeout-minutes: 5
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-
-      # trusted publishing requires node 22.14+ and npm 11.5.1+
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          registry-url: "https://registry.npmjs.org"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build npm package (dist/)
-        run: /bin/bash build.sh
-
-      - name: Version from the tag
-        run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          npm version "${VERSION}" --no-git-tag-version --allow-same-version
-          npm pack --dry-run
-
-      - name: Publish
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          node --version
-          npm --version
-          if [[ -n "${NPM_TOKEN}" ]]; then
-            echo "secret NPM_TOKEN found: publishing with the token"
-            export NODE_AUTH_TOKEN="${NPM_TOKEN}"
-          else
-            echo "no secret NPM_TOKEN: publishing with trusted publishing (OIDC)"
-          fi
-          npm publish --access public

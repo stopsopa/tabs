@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ES module with autoenable in the url</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="../../skills/vanilla-tabs/vanilla-tabs.css" />
+  </head>
+  <body>
+    <div data-vanilla-tabs id="tabs">
+      <div data-buttons>
+        <span>first</span>
+        <span class="active">second</span>
+        <span>third</span>
+      </div>
+      <div data-tabs>
+        <div>content of first</div>
+        <div>content of second</div>
+        <div>content of third</div>
+      </div>
+    </div>
+    <pre id="log"></pre>
+    <script type="module">
+      import vanillaTabs, {
+        vanillaTabs as named,
+      } from "../../skills/vanilla-tabs/vanilla-tabs.esm.js?vanilla-tabs-autoenable";
+
+      window.sameObject = vanillaTabs === named && vanillaTabs === window.vanillaTabs;
+
+      vanillaTabs.on(document.querySelector("#tabs"), ({ index, previousIndex }) => {
+        document.querySelector("#log").textContent += `${previousIndex}>${index} `;
+      });
+    </script>
+  </body>
+</html>

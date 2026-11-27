@@ -3,10 +3,11 @@
  * @ver 0.1 - 2015-10-21 - first jQuery based implementation
  * @ver 0.2 - 2024-12-12 - refactoring the idea to vanilla js
  * @ver 0.3 - 2026-11-18 - transparent by default, colors via css variables/attributes, overflow navigation
+ * @ver 0.4 - 2026-11-27 - visible keyboard focus, <button> can be used as a tab button
  * @homepage https://github.com/stopsopa/tabs
- * @demo http://stopsopa.github.io/submod/tabs/demo/demo.html
+ * @demo https://stopsopa.github.io/tabs/
  *
- * Copyright (c) 2015 Szymon Działowski
+ * Copyright (c) 2015-2026 Szymon Działowski
  * Released under the MIT license
  * http://en.wikipedia.org/wiki/MIT_License
  */
@@ -57,9 +58,13 @@
   color: var(--vanilla-tabs-lines-color, #565656);
   text-decoration: none;
   white-space: nowrap;
-  outline: 0;
+  /* reset for <button> used as a tab button (no effect on span / a) */
+  appearance: none;
+  background-color: transparent;
+  border-radius: 0;
+  line-height: normal;
   /* neighbours share 1px column, so there is never double line between them */
-  margin-right: -1px;
+  margin: 0 -1px 0 0;
   /* border + padding always gives 11px, only proportions are changing between states */
   border: 0 solid var(--vanilla-tabs-lines-color, #565656);
   border-bottom-width: 1px;
@@ -75,6 +80,12 @@
   border-width: 1px 1px 0 1px;
   padding: 10px 10px 11px 10px;
   background-color: var(--vanilla-tabs-background-color, transparent);
+}
+/* keyboard focus (not shown after a mouse click). Inside of the box: the row of buttons clips what sticks out */
+[data-vanilla-tabs] > [data-buttons] > :focus-visible,
+[data-vanilla-tabs] > [data-vanilla-tabs-nav]:focus-visible {
+  outline: 2px solid var(--vanilla-tabs-lines-color, #565656);
+  outline-offset: -4px;
 }
 [data-vanilla-tabs] > [data-tabs] {
   grid-column: 1 / -1;
@@ -113,7 +124,6 @@
   border: 0;
   border-bottom: 1px solid var(--vanilla-tabs-lines-color, #565656);
   border-radius: 0;
-  outline: 0;
 }
 [data-vanilla-tabs] > [data-vanilla-tabs-nav="prev"] {
   grid-column: 1;

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <title>classic script loaded in head</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="../../skills/vanilla-tabs/vanilla-tabs.css" />
+    <!-- executed before <body> exists -->
+    <script src="../../skills/vanilla-tabs/vanilla-tabs.js?vanilla-tabs-autoenable"></script>
+  </head>
+  <body>
+    <div data-vanilla-tabs id="tabs">
+      <div data-buttons>
+        <span>first</span>
+        <span class="active">second</span>
+        <span>third</span>
+      </div>
+      <div data-tabs>
+        <div>content of first</div>
+        <div>content of second</div>
+        <div>content of third</div>
+      </div>
+    </div>
+  </body>
+</html>

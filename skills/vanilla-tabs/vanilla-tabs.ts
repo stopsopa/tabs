@@ -28,7 +28,14 @@ export type VanillaTabsOnChange = (data: { button: Element; tab: Element; index:
  * "vanilla-tabs:change" is dispatched on the tab content element and it bubbles, so:
  *
  *   document.addEventListener("vanilla-tabs:change", (e) => {
- *     const { parent, button, tab, index } = e.detail;
+ *     const { parent, button, tab, index, previousIndex } = e.detail;
+ *   });
+ *
+ * Before a change requested by the user (click, keyboard - not by the api) cancelable CustomEvent
+ * "vanilla-tabs:before-change" with the same detail is dispatched in the same way:
+ *
+ *   document.addEventListener("vanilla-tabs:before-change", (e) => {
+ *     if (unsavedChanges) e.preventDefault(); // tab stays
  *   });
  */
 export type VanillaTabsChangeDetail = {
@@ -36,6 +43,10 @@ export type VanillaTabsChangeDetail = {
   button: Element;
   tab: Element;
   index: number;
+  /**
+   * Zero based index of the tab which was visible before, -1 when there was none (first activation)
+   */
+  previousIndex: number;
 };
 
 export type VanillaTabsExtra = {
@@ -47,19 +58,32 @@ export type VanillaTabsExtra = {
 export type VanillaTabsUnbind = () => void;
 
 export interface VanillaTabs {
+  /**
+   * One time preparation of single [data-vanilla-tabs] element (colors from attributes, arrows).
+   * Called by active(), safe to call many times.
+   */
   setup(parent: HTMLElement): void;
   updateOverflow(parent: HTMLElement): void;
   scrollToButton(button: Element): void;
   getNewId(): string;
   produceId(parent: Element): string;
-  active(opt?: { onChange?: VanillaTabsOnChange }): string[];
+  /**
+   * Activates initial tab (button with class "active", otherwise the first one) in every [data-vanilla-tabs]
+   * of the document, or of given root (the root itself included). Returns ids of processed elements.
+   */
+  active(opt?: { onChange?: VanillaTabsOnChange; root?: ParentNode }): string[];
   activeByButtonElement(parent: Element, target: Element, extra?: VanillaTabsExtra): string;
-  bindOnChange(id: string, onChange?: VanillaTabsOnChange): void;
+  /**
+   * Binds callback to single [data-vanilla-tabs] element, called when its tab changes.
+   * Prefer on() or the "vanilla-tabs:change" event - they do the same and can be unbound.
+   */
+  bindOnChange(parent: Element | string, onChange?: VanillaTabsOnChange): void;
   activeByIndex(parent: Element, zeroIndex?: number, extra?: VanillaTabsExtra): string;
   /**
-   * Returns unbind function, or the tool itself if it was already bound
+   * Starts handling clicks and keyboard (delegated listeners on document).
+   * Returns unbind function (the same one when called again while bound).
    */
-  bind(): VanillaTabsUnbind | VanillaTabs;
+  bind(): VanillaTabsUnbind;
   /**
    * Binds callback to single [data-vanilla-tabs] element (events from nested tabs are ignored).
    * Listener is attached to the element itself, nothing global holds reference to it,
@@ -76,6 +100,12 @@ export interface VanillaTabs {
    */
   autoenable(): void;
   autoenableUnbind?: () => void;
+  /**
+   * Removes everything the library attached: listeners on document, mutation observer, resize observer
+   * and scroll listeners of all prepared elements. Markup (classes, attributes, arrows) stays as it is.
+   * After that the library can be enabled again.
+   */
+  destroy(): void;
 }
 
 declare global {
@@ -85,44 +115,160 @@ declare global {
 }
 
 const vanillaTabs: VanillaTabs = (function (): VanillaTabs {
-  const onChangeEvents: Record<string, VanillaTabsOnChange> = {};
+  // keyed by element: nothing leaks when element is removed and copies of an element (cloneNode) share nothing
+  let onChangeEvents = new WeakMap<Element, VanillaTabsOnChange>();
+
+  let ids = new WeakMap<Element, string>();
 
   const dataidkey = "data-vanilla-tab-id";
 
   const changeEventName = "vanilla-tabs:change";
 
+  const beforeChangeEventName = "vanilla-tabs:before-change";
+
+  const rootSelector = "[data-vanilla-tabs]";
+
+  const buttonSelector = "[data-vanilla-tabs] > [data-buttons] > *";
+
+  const navSelector = "[data-vanilla-tabs] > [data-vanilla-tabs-nav]";
+
+  const colors = [
+    ["data-background-color", "--vanilla-tabs-background-color"],
+    ["data-lines-color", "--vanilla-tabs-lines-color"],
+  ];
+
   let i = 0;
 
-  const warn = (function (): (...args: unknown[]) => void {
-    try {
-      return (...args) => console.warn("vanilla-tabs:", ...args);
-    } catch (e) {
-      return () => {};
+  function warn(...args: unknown[]): void {
+    if (typeof console !== "undefined") {
+      console.warn("vanilla-tabs:", ...args);
     }
-  })();
-
-  const th = (msg: string, ..._context: unknown[]) => new Error(`vanilla-tabs error: ${msg}`);
-
-  function isObjectLike(value: unknown): boolean {
-    return value != null && typeof value == "object";
   }
-  function isPlainObject(value: unknown): boolean {
-    // simplified version of isPlainObject then the one in lodash
-    return Object.prototype.toString.call(value) === "[object Object]";
+
+  function th(msg: string, ...context: unknown[]): Error {
+    const error = new Error(`vanilla-tabs error: ${msg}`) as Error & { context?: unknown[] };
+
+    // visible when the error is inspected in the console
+    error.context = context;
+
+    return error;
   }
-  function isNode(value: unknown): boolean {
-    return isObjectLike(value) && !isPlainObject(value);
+
+  function isElement(value: unknown): value is Element {
+    // nodeType: elements from another frame are not instances of Element of this window
+    return typeof value === "object" && value !== null && (value as Node).nodeType === 1;
   }
 
   function children(parent: Element, selector: string): Element[] {
-    const container = parent.querySelector(selector);
+    const container = parent.querySelector(`:scope > ${selector}`);
 
     return container ? Array.from(container.children) : [];
   }
 
-  let bound = false;
+  function elementId(element: Element, prefix: string): string {
+    if (!element.id) {
+      i += 1;
 
-  const prepared = new WeakSet<Element>();
+      element.id = `${prefix}-${i}`;
+    }
+
+    return element.id;
+  }
+
+  /**
+   * Roles and aria attributes (https://www.w3.org/WAI/ARIA/apg/patterns/tabs/) + roving tabindex:
+   * only active button is in the tab order, the others are reached with arrow keys
+   */
+  function accessibility(parent: Element, buttons: Element[], tabs: Element[], zeroIndex: number): void {
+    parent.querySelector(":scope > [data-buttons]")?.setAttribute("role", "tablist");
+
+    buttons.forEach(function (button, i) {
+      const tab = tabs[i];
+
+      button.setAttribute("role", "tab");
+
+      button.setAttribute("aria-selected", i === zeroIndex ? "true" : "false");
+
+      button.setAttribute("tabindex", i === zeroIndex ? "0" : "-1");
+
+      button.setAttribute("aria-controls", elementId(tab, "vanilla-tabs-tab"));
+
+      tab.setAttribute("role", "tabpanel");
+
+      tab.setAttribute("aria-labelledby", elementId(button, "vanilla-tabs-button"));
+    });
+  }
+
+  function applyColors(parent: HTMLElement, remove: boolean): void {
+    colors.forEach(([attr, variable]) => {
+      const value = parent.getAttribute(attr);
+
+      if (typeof value === "string" && value.trim()) {
+        parent.style.setProperty(variable, value.trim());
+      } else if (remove) {
+        parent.style.removeProperty(variable);
+      }
+    });
+  }
+
+  /**
+   * setup() + activation of the button with class "active" (or the first one).
+   * silent: used for elements which might be incomplete at the moment (page still parsed, framework
+   * adding buttons and panels in separate steps) - they are handled again when the rest arrives
+   */
+  function activate(parent: HTMLElement, onChange: VanillaTabsOnChange | undefined, silent: boolean): void {
+    tool.setup(parent);
+
+    const buttons = children(parent, "[data-buttons]");
+
+    if (silent && (buttons.length === 0 || buttons.length !== children(parent, "[data-tabs]").length)) {
+      return;
+    }
+
+    const index = buttons.findIndex((button) => button.classList.contains("active"));
+
+    tool.activeByIndex(parent, Math.max(index, 0), { buttons, onChange });
+  }
+
+  /**
+   * Change requested by the user (click, keyboard): it can be cancelled in "vanilla-tabs:before-change"
+   */
+  function request(parent: Element, buttons: Element[], zeroIndex: number): boolean {
+    const tabs = children(parent, "[data-tabs]");
+
+    const button = buttons[zeroIndex];
+
+    const tab = tabs[zeroIndex];
+
+    if (button && tab && !button.classList.contains("active")) {
+      const detail: VanillaTabsChangeDetail = {
+        parent,
+        button,
+        tab,
+        index: zeroIndex,
+        previousIndex: buttons.findIndex((b) => b.classList.contains("active")),
+      };
+
+      const allowed = tab.dispatchEvent(
+        new CustomEvent(beforeChangeEventName, { bubbles: true, cancelable: true, detail }),
+      );
+
+      if (!allowed) {
+        return false;
+      }
+    }
+
+    tool.activeByIndex(parent, zeroIndex, { buttons, tabs });
+
+    return true;
+  }
+
+  let unbind: VanillaTabsUnbind | undefined;
+
+  let prepared = new WeakSet<Element>();
+
+  // all scroll listeners of prepared elements are removed with one abort() in destroy()
+  let listeners: AbortController | undefined;
 
   let resizeObserver: ResizeObserver | undefined;
 
@@ -141,16 +287,7 @@ const vanillaTabs: VanillaTabs = (function (): VanillaTabs {
         return;
       }
 
-      [
-        ["data-background-color", "--vanilla-tabs-background-color"],
-        ["data-lines-color", "--vanilla-tabs-lines-color"],
-      ].forEach(([attr, variable]) => {
-        const value = parent.getAttribute(attr);
-
-        if (typeof value === "string" && value.trim()) {
-          parent.style.setProperty(variable, value.trim());
-        }
-      });
+      applyColors(parent, false);
 
       [
         ["prev", "‹", "previous tabs"],
@@ -168,6 +305,9 @@ const vanillaTabs: VanillaTabs = (function (): VanillaTabs {
 
         nav.setAttribute("aria-label", aria);
 
+        // arrows only scroll the row: keyboard users move between tabs with arrow keys and the row follows
+        nav.setAttribute("tabindex", "-1");
+
         nav.textContent = label;
 
         parent.appendChild(nav);
@@ -176,8 +316,13 @@ const vanillaTabs: VanillaTabs = (function (): VanillaTabs {
       if (!prepared.has(buttons)) {
         prepared.add(buttons);
 
+        if (!listeners && typeof AbortController === "function") {
+          listeners = new AbortController();
+        }
+
         buttons.addEventListener("scroll", () => this.updateOverflow(parent), {
           passive: true,
+          signal: listeners?.signal,
         });
 
         if (typeof ResizeObserver === "function") {
@@ -265,49 +410,49 @@ const vanillaTabs: VanillaTabs = (function (): VanillaTabs {
       return `vanilla-tabs-${i}`;
     },
     produceId: function (parent) {
-      if (!isNode(parent)) {
+      if (!isElement(parent)) {
         throw th(`parent argument is not valid DOM element`, parent);
       }
 
-      let id = parent.getAttribute(dataidkey);
+      let id = ids.get(parent);
 
       if (typeof id !== "string") {
-        parent.setAttribute(dataidkey, (id = this.getNewId()));
+        // the attribute is only informative. It is not trusted: a copy of an element (cloneNode, innerHTML)
+        // comes with the attribute of the original and gets its own id here
+        id = this.getNewId();
+
+        ids.set(parent, id);
+
+        parent.setAttribute(dataidkey, id);
       }
 
       return id;
     },
     active: function (opt) {
-      const ids: string[] = [];
+      const list: string[] = [];
 
-      const { onChange } = { ...opt };
+      const { onChange, root } = { ...opt };
 
-      Array.from(document.querySelectorAll<HTMLElement>("[data-vanilla-tabs]"))
-        .map((parent) => {
-          ids.push(this.produceId(parent));
+      const scope: ParentNode = root || document;
 
-          this.setup(parent);
+      const found = Array.from(scope.querySelectorAll<HTMLElement>(rootSelector));
 
-          return parent.querySelector(":scope > [data-buttons]");
-        })
-        .map((buttons) => {
-          if (!buttons) {
-            return null;
-          }
+      if (isElement(scope) && scope.matches(rootSelector)) {
+        found.unshift(scope as HTMLElement);
+      }
 
-          return buttons.querySelector(":scope > .active") || buttons.querySelector(":scope > *");
-        })
-        .forEach((target) => {
-          const parent = target?.parentElement?.parentElement;
+      found.forEach((parent) => {
+        list.push(this.produceId(parent));
 
-          if (target && parent) {
-            this.activeByButtonElement(parent, target, {
-              onChange,
-            });
-          }
-        });
+        // one broken element doesn't stop the others
+        try {
+          activate(parent, onChange, false);
+        } catch (e) {
+          warn(e, parent);
+        }
+      });
 
-      return ids;
+      return list;
     },
     activeByButtonElement: function (parent, target, extra) {
       const id = this.produceId(parent);
@@ -318,15 +463,22 @@ const vanillaTabs: VanillaTabs = (function (): VanillaTabs {
         buttons = children(parent, "[data-buttons]");
       }
 
-      const zeroIndex = buttons.indexOf(target) ?? 0;
+      const zeroIndex = buttons.indexOf(target);
+
+      if (zeroIndex === -1) {
+        throw th(`target is not a button (direct child of [data-buttons]) of given parent`, target, parent);
+      }
 
       this.activeByIndex(parent, zeroIndex, { buttons, onChange });
 
       return id;
     },
-    bindOnChange: function (id, onChange) {
-      if (typeof onChange === "function") {
-        onChangeEvents[id] = onChange;
+    bindOnChange: function (parent, onChange) {
+      const element =
+        typeof parent === "string" ? document.querySelector(`[${dataidkey}=${JSON.stringify(parent)}]`) : parent;
+
+      if (element && typeof onChange === "function") {
+        onChangeEvents.set(element, onChange);
       }
     },
     activeByIndex: function (parent, zeroIndex = 0, extra) {
@@ -334,7 +486,7 @@ const vanillaTabs: VanillaTabs = (function (): VanillaTabs {
 
       let { buttons, tabs, onChange } = { ...extra };
 
-      this.bindOnChange(id, onChange);
+      this.bindOnChange(parent, onChange);
 
       if (!buttons) {
         buttons = children(parent, "[data-buttons]");
@@ -357,73 +509,63 @@ const vanillaTabs: VanillaTabs = (function (): VanillaTabs {
       }
 
       if (buttons.length !== tabs.length) {
-        throw th(`buttons and tabs length mismatch`, parent);
+        // not an exception: it happens for a moment when buttons and panels are added in separate steps
+        warn(`buttons (${buttons.length}) and tabs (${tabs.length}) length mismatch`, parent);
+
+        return id;
       }
 
-      if (!(Number.isInteger(zeroIndex) && !Number.isNaN(zeroIndex) && zeroIndex > -1)) {
-        throw th(`zeroIndex not found`, zeroIndex, parent);
+      if (!Number.isInteger(zeroIndex) || zeroIndex < 0 || zeroIndex >= buttons.length) {
+        throw th(`zeroIndex ${zeroIndex} is not an integer from 0 to ${buttons.length - 1}`, zeroIndex, parent);
       }
 
-      {
-        const onChange = onChangeEvents[id];
+      const list = tabs;
 
-        const list = tabs;
+      const button = buttons[zeroIndex];
 
-        buttons.forEach(function (button, i) {
-          if (i === zeroIndex) {
-            const changed = !button.classList.contains("active") || !list[i].classList.contains("active");
+      const tab = list[zeroIndex];
 
-            button.classList.add("active");
+      const previousIndex = buttons.findIndex((b, i) => i !== zeroIndex && b.classList.contains("active"));
 
-            list[i].classList.add("active");
+      const changed = !button.classList.contains("active") || !tab.classList.contains("active");
 
-            tool.scrollToButton(button);
+      buttons.forEach(function (b, i) {
+        b.classList.toggle("active", i === zeroIndex);
 
-            if (changed) {
-              const detail: VanillaTabsChangeDetail = {
-                parent,
-                button,
-                tab: list[i],
-                index: i,
-              };
+        list[i].classList.toggle("active", i === zeroIndex);
+      });
 
-              list[i].dispatchEvent(new CustomEvent(changeEventName, { bubbles: true, detail }));
-            }
+      accessibility(parent, buttons, list, zeroIndex);
 
-            if (onChange) {
-              onChange({
-                button,
-                tab: list[i],
-                index: i,
-              });
-            }
-          } else {
-            button.classList.remove("active");
+      tool.scrollToButton(button);
 
-            list[i].classList.remove("active");
-          }
-        });
+      if (changed) {
+        const detail: VanillaTabsChangeDetail = { parent, button, tab, index: zeroIndex, previousIndex };
+
+        tab.dispatchEvent(new CustomEvent(changeEventName, { bubbles: true, detail }));
+
+        const callback = onChangeEvents.get(parent);
+
+        if (callback) {
+          callback({ button, tab, index: zeroIndex });
+        }
       }
 
       return id;
     },
     bind: function () {
-      if (bound) {
-        warn(`already bound`);
-
-        return this;
+      if (unbind) {
+        return unbind;
       }
 
-      bound = true;
-
-      const event = (e: MouseEvent) => {
+      const click = (e: MouseEvent) => {
         const target = e.target;
 
-        if (!(target instanceof Element)) {
+        if (!isElement(target)) {
           return;
         }
 
-        const nav = target.closest("[data-vanilla-tabs] > [data-vanilla-tabs-nav]");
+        const nav = target.closest(navSelector);
 
         if (nav) {
           const buttons = nav.parentElement?.querySelector(":scope > [data-buttons]");
@@ -440,27 +582,92 @@ const vanillaTabs: VanillaTabs = (function (): VanillaTabs {
           return;
         }
 
-        const match = target.matches("[data-vanilla-tabs] > [data-buttons] > *");
+        // closest: the click might land on an element nested in the button (icon, <b>...)
+        const button = target.closest(buttonSelector);
 
-        const parent = target.parentElement?.parentElement;
+        const parent = button?.parentElement?.parentElement;
 
-        if (match && parent) {
-          const buttons = children(parent, "[data-buttons]");
+        if (!button || !parent) {
+          return;
+        }
 
-          const zeroIndex = buttons.indexOf(target) ?? 0;
+        // <a href="#"> used as a button must not navigate
+        if (button.matches("a[href]")) {
+          e.preventDefault();
+        }
 
-          this.activeByIndex(parent, zeroIndex, { buttons });
+        const buttons = children(parent, "[data-buttons]");
+
+        request(parent, buttons, buttons.indexOf(button));
+      };
+
+      const keydown = (e: KeyboardEvent) => {
+        const button = e.target;
+
+        // only when the button itself has focus, not something inside of a panel or of the button
+        if (!isElement(button) || !button.matches(buttonSelector) || e.altKey || e.ctrlKey || e.metaKey) {
+          return;
+        }
+
+        const parent = button.parentElement?.parentElement;
+
+        if (!parent) {
+          return;
+        }
+
+        const buttons = children(parent, "[data-buttons]");
+
+        const current = buttons.indexOf(button);
+
+        const last = buttons.length - 1;
+
+        let index: number;
+
+        switch (e.key) {
+          case "ArrowRight":
+            index = current === last ? 0 : current + 1;
+            break;
+          case "ArrowLeft":
+            index = current === 0 ? last : current - 1;
+            break;
+          case "Home":
+            index = 0;
+            break;
+          case "End":
+            index = last;
+            break;
+          case "Enter":
+          case " ":
+            index = current;
+            break;
+          default:
+            return;
+        }
+
+        e.preventDefault();
+
+        if (request(parent, buttons, index)) {
+          (buttons[index] as HTMLElement).focus();
         }
       };
 
-      document.body.addEventListener("click", event);
+      // document (not document.body): it exists also when the script is loaded in <head>
+      document.addEventListener("click", click);
 
-      return () => {
-        document.body.removeEventListener("click", event);
+      document.addEventListener("keydown", keydown);
+
+      unbind = () => {
+        document.removeEventListener("click", click);
+
+        document.removeEventListener("keydown", keydown);
+
+        unbind = undefined;
       };
+
+      return unbind;
     },
     on: function (parent, callback) {
-      if (!isNode(parent)) {
+      if (!isElement(parent)) {
         throw th(`on(): parent argument is not valid DOM element`, parent);
       }
 
@@ -483,47 +690,75 @@ const vanillaTabs: VanillaTabs = (function (): VanillaTabs {
       if (observer) {
         return;
       }
-      observer = new MutationObserver(function (mutations) {
-        // Replace old iteration with Array.some to break early when a matching element is found
-        const found = mutations.some(function (mutation) {
-          if (mutation.type === "childList") {
-            return Array.from(mutation.addedNodes).some(function (node) {
-              return (
-                node instanceof Element &&
-                (node.matches("[data-buttons]") || Boolean(node.querySelector("[data-buttons]")))
-              );
-            });
-          }
-          return false;
-        });
-        if (found) {
-          tool.active();
-        }
 
-        // buttons added to or removed from existing tabs - check if they still fit
+      observer = new MutationObserver(function (mutations) {
+        // only [data-vanilla-tabs] elements touched by the mutations are processed, not the whole document
         const changed = new Set<HTMLElement>();
+
+        const collect = (node: Node, deep: boolean) => {
+          if (!isElement(node) || node.matches(navSelector)) {
+            return;
+          }
+
+          // element added to / removed from existing tabs: button, panel, [data-buttons], [data-tabs]
+          const root = node.closest<HTMLElement>(rootSelector);
+
+          if (root) {
+            changed.add(root);
+          }
+
+          // added element contains tabs
+          if (deep) {
+            node.querySelectorAll<HTMLElement>(rootSelector).forEach((el) => changed.add(el));
+          }
+        };
 
         mutations.forEach(function (mutation) {
           const target = mutation.target;
 
-          if (
-            mutation.type === "childList" &&
-            target instanceof Element &&
-            target.matches("[data-vanilla-tabs] > [data-buttons]") &&
-            target.parentElement
-          ) {
-            changed.add(target.parentElement);
+          if (mutation.type === "attributes") {
+            if (target instanceof HTMLElement && target.matches(rootSelector)) {
+              applyColors(target, true);
+            }
+
+            return;
+          }
+
+          mutation.addedNodes.forEach((node) => collect(node, true));
+
+          // removed nodes are detached, so the place they were removed from is checked instead
+          if (mutation.removedNodes.length > 0 && isElement(target) && target.matches("[data-buttons], [data-tabs]")) {
+            const removed = Array.from(mutation.removedNodes).some((node) => isElement(node));
+
+            if (removed) {
+              collect(target, false);
+            }
           }
         });
 
         changed.forEach(function (parent) {
-          tool.setup(parent);
+          if (!parent.isConnected) {
+            return;
+          }
+
+          try {
+            activate(parent, undefined, true);
+          } catch (e) {
+            warn(e, parent);
+          }
         });
       });
-      observer.observe(document.body, { childList: true, subtree: true });
+
+      // document (not document.body): it exists also when the script is loaded in <head>
+      observer.observe(document, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: colors.map(([attr]) => attr),
+      });
     },
     watchMutationsDisable: function () {
-      if (observer && typeof observer.disconnect === "function") {
+      if (observer) {
         observer.disconnect();
       }
 
@@ -534,7 +769,7 @@ const vanillaTabs: VanillaTabs = (function (): VanillaTabs {
         return;
       }
 
-      const unbind = tool.bind();
+      const off = tool.bind();
 
       tool.active();
 
@@ -543,46 +778,63 @@ const vanillaTabs: VanillaTabs = (function (): VanillaTabs {
       tool.autoenableUnbind = function () {
         tool.watchMutationsDisable();
 
-        if (typeof unbind === "function") {
-          unbind();
-        }
-
-        bound = false;
+        off();
 
         delete tool.autoenableUnbind;
       };
     },
+    destroy: function () {
+      tool.autoenableUnbind?.();
+
+      unbind?.();
+
+      tool.watchMutationsDisable();
+
+      resizeObserver?.disconnect();
+
+      resizeObserver = undefined;
+
+      listeners?.abort();
+
+      listeners = undefined;
+
+      prepared = new WeakSet();
+
+      onChangeEvents = new WeakMap();
+
+      ids = new WeakMap();
+    },
   };
 
-  // autobind when certain condition met
+  // autoenable when certain condition met
 
-  const autoenable = (function (): boolean {
-    // no DOM (module imported on the server) - nothing to detect
-    if (typeof document === "undefined") {
-      return false;
+  // no DOM (module imported on the server) - nothing to detect
+  if (typeof document !== "undefined") {
+    // ?vanilla-tabs-autoenable in the url of the classic script which is executing right now.
+    // (ES module: document.currentScript is null, generated vanilla-tabs.esm.js checks import.meta.url itself)
+    const src = document.currentScript?.getAttribute("src");
+
+    const byUrl =
+      typeof src === "string" &&
+      src.length > 0 &&
+      new URL(src, window.location.href).searchParams.has("vanilla-tabs-autoenable");
+
+    const byClass = () => Boolean(document.body?.classList.contains("vanilla-tabs-autoenable"));
+
+    if (byUrl || byClass()) {
+      tool.autoenable();
+    } else if (!document.body) {
+      // script in <head>: class of <body> is not known yet
+      document.addEventListener(
+        "DOMContentLoaded",
+        () => {
+          if (byClass()) {
+            tool.autoenable();
+          }
+        },
+        { once: true },
+      );
     }
-
-    if (document.body.classList.contains("vanilla-tabs-autoenable")) {
-      return true;
-    }
-
-    return Array.from(document.querySelectorAll("script")).some((el) => {
-      const src = el.getAttribute("src");
-
-      if (typeof src === "string" && src.length > 0) {
-        const url = new URL(src, window.location.href);
-
-        if (url.searchParams.has("vanilla-tabs-autoenable")) {
-          return true;
-        }
-      }
-
-      return false;
-    });
-  })();
-
-  if (autoenable) {
-    tool.autoenable();
   }
 
   return tool;

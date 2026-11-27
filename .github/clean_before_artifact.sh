@@ -31,15 +31,13 @@ rm -rf package.json
 rm -rf node_modules
 rm -rf package-lock.json
 rm -rf transpile.sh
-# sources, tests and tooling of the npm package (published by job "npm" from its own checkout), not part of the site
-rm -rf dist
-rm -rf react
+# tests and tooling, not part of the site
 rm -rf test
-rm -rf bash
-rm -rf tag.sh
-rm -rf build.sh
+rm -rf e2e
+rm -rf test-results
+rm -rf playwright-report
+rm -rf playwright.config.ts
 rm -rf tsconfig.json
-rm -rf tsconfig.build.json
 rm -rf vitest.config.ts
-rm -rf NPM_RELEASE.md
+rm -rf SUGGESTED_IMPROVEMENTS.md
 rm -rf __links

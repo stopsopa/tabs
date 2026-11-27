@@ -5,13 +5,18 @@
 #   skills/vanilla-tabs/vanilla-tabs.esm.js  - ES module: import vanillaTabs from "./vanilla-tabs.esm.js"
 #   skills/vanilla-tabs/vanilla-tabs.js      - classic <script src="vanilla-tabs.js"> defining window.vanillaTabs
 #
-# Both are in .gitignore - they exist only after running this script. They are needed by:
+# and the bundle of the demo of the React component (react + react-dom + skills/vanilla-tabs/Tabs.tsx + demo/react/**/*.tsx):
+#
+#   demo/react/main.js                       - loaded by demo/react/index.html
+#
+# All are in .gitignore - they exist only after running this script. They are needed by:
 #   - index.html (demo, "xx server" runs this script first)
 #   - github pages (.github/workflows/deploy.yaml runs this script before the deployment)
-#   - npm package (build.sh runs this script and copies them to dist/)
+#   - tests (test/generated.test.ts and e2e/ run this script on their own)
 #
 #   npm install
 #   /bin/bash transpile.sh
+#   /bin/bash transpile.sh --watch     # keep rebuilding on changes (xx watch = this + the server)
 #
 # WARNING: esbuild only strips types, it doesn't check them (for that: npm run typecheck)
 
@@ -42,23 +47,65 @@ ESM_FOOTER='if (typeof window !== "undefined" && new URL(import.meta.url).search
   window.vanillaTabs.autoenable();
 }'
 
-"${ESBUILD}" "${SOURCE}" \
-  --bundle \
-  --format=esm \
-  --outfile=skills/vanilla-tabs/vanilla-tabs.esm.js \
-  --target=es2020 \
-  --charset=utf8 \
-  --banner:js="${BANNER}" \
-  --footer:js="${ESM_FOOTER}"
+# $1 - extra argument for esbuild (--watch=forever), might be empty
+function esm {
+  "${ESBUILD}" "${SOURCE}" \
+    --bundle \
+    --format=esm \
+    --outfile=skills/vanilla-tabs/vanilla-tabs.esm.js \
+    --target=es2020 \
+    --charset=utf8 \
+    --banner:js="${BANNER}" \
+    --footer:js="${ESM_FOOTER}" \
+    ${1}
+}
 
 # iife: exports are dropped, window.vanillaTabs is defined by the code itself
-"${ESBUILD}" "${SOURCE}" \
-  --bundle \
-  --format=iife \
-  --outfile=skills/vanilla-tabs/vanilla-tabs.js \
-  --target=es2020 \
-  --charset=utf8 \
-  --banner:js="${BANNER}"
+function classic {
+  "${ESBUILD}" "${SOURCE}" \
+    --bundle \
+    --format=iife \
+    --outfile=skills/vanilla-tabs/vanilla-tabs.js \
+    --target=es2020 \
+    --charset=utf8 \
+    --banner:js="${BANNER}" \
+    ${1}
+}
+
+# demo of the React component: everything (also react itself) in one file, the page has no other scripts of its own
+function demo {
+  "${ESBUILD}" demo/react/main.tsx \
+    --bundle \
+    --format=esm \
+    --jsx=automatic \
+    --minify \
+    --define:process.env.NODE_ENV='"production"' \
+    --outfile=demo/react/main.js \
+    --target=es2020 \
+    --charset=utf8 \
+    --banner:js="/* GENERATED FILE - don't edit. Edit demo/react/main.tsx and run: /bin/bash transpile.sh */" \
+    ${1}
+}
+
+if [ "${1}" = "--watch" ]; then
+  # rebuilds on every change of the sources until Ctrl+C. Generated files are not formatted with prettier
+  # in this mode - run the script without --watch at the end
+  trap 'kill 0' EXIT
+
+  esm --watch=forever &
+  classic --watch=forever &
+  demo --watch=forever &
+
+  wait
+
+  exit 0
+fi
+
+esm
+
+classic
+
+demo
 
 # generated files are formatted too, so projects copying them and running prettier
 # (printWidth 120, see prettier.config.cjs) don't get them reformatted.

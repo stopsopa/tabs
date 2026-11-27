@@ -1,16 +1,16 @@
 /**
- * Tests of the React component react/Tabs.tsx (vitest + jsdom + @testing-library/react).
+ * Tests of the React component skills/vanilla-tabs/Tabs.tsx (vitest + jsdom + @testing-library/react).
  *
  *   npm test          (or: xx test)
  *
  * jsdom has no layout: scrollWidth/clientWidth are always 0 and element.scrollBy() doesn't exist,
  * so tests of the overflow arrows define them by hand.
  */
-import { createRef, useState } from "react";
+import { createRef, Fragment, StrictMode, useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 
-import { Tab, Tabs } from "../react/index.js";
+import { Tab, Tabs } from "../skills/vanilla-tabs/Tabs.tsx";
 
 afterEach(() => {
   cleanup();
@@ -498,5 +498,330 @@ describe("overflow arrows", () => {
     expect(onChange).not.toHaveBeenCalled();
 
     expect(state(container).activeButtons).toEqual([true, false, false]);
+  });
+});
+
+describe("onShow", () => {
+  it("is called for the initial tab and after every change, with elements of the tab", () => {
+    const onShow = vi.fn();
+
+    const { container } = render(three({ defaultIndex: 1, onShow }));
+
+    const { root, buttons, panels } = state(container);
+
+    expect(onShow).toHaveBeenCalledTimes(1);
+
+    expect(onShow).toHaveBeenLastCalledWith({
+      parent: root,
+      button: buttons[1],
+      tab: panels[1],
+      index: 1,
+      previousIndex: -1,
+    });
+
+    fireEvent.click(buttons[2]);
+
+    expect(onShow).toHaveBeenCalledTimes(2);
+
+    expect(onShow).toHaveBeenLastCalledWith({
+      parent: root,
+      button: buttons[2],
+      tab: panels[2],
+      index: 2,
+      previousIndex: 1,
+    });
+
+    // already active
+    fireEvent.click(buttons[2]);
+
+    expect(onShow).toHaveBeenCalledTimes(2);
+  });
+
+  it("is called when the tab is changed with the index prop (onChange is not)", () => {
+    const onShow = vi.fn();
+
+    const onChange = vi.fn();
+
+    const { rerender } = render(three({ index: 0, onShow, onChange }));
+
+    rerender(three({ index: 2, onShow, onChange }));
+
+    expect(onShow.mock.calls.map(([detail]) => detail.index)).toEqual([0, 2]);
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("is not called again when the component rerenders with new callback", () => {
+    const first = vi.fn();
+
+    const second = vi.fn();
+
+    const { container, rerender } = render(three({ onShow: first }));
+
+    rerender(three({ onShow: second }));
+
+    expect(first).toHaveBeenCalledTimes(1);
+
+    expect(second).not.toHaveBeenCalled();
+
+    fireEvent.click(state(container).buttons[1]);
+
+    expect(first).toHaveBeenCalledTimes(1);
+
+    expect(second).toHaveBeenCalledTimes(1);
+  });
+
+  it("is called once for the initial tab in StrictMode", () => {
+    const onShow = vi.fn();
+
+    render(<StrictMode>{three({ onShow })}</StrictMode>);
+
+    expect(onShow).toHaveBeenCalledTimes(1);
+  });
+
+  it("of <Tab> is called only for that tab, every time it becomes visible", () => {
+    const onShow = vi.fn();
+
+    const { container } = render(
+      <Tabs>
+        <Tab label="first">1</Tab>
+        <Tab label="second" onShow={onShow}>
+          2
+        </Tab>
+      </Tabs>,
+    );
+
+    const { buttons, panels } = state(container);
+
+    expect(onShow).not.toHaveBeenCalled();
+
+    fireEvent.click(buttons[1]);
+
+    fireEvent.click(buttons[0]);
+
+    fireEvent.click(buttons[1]);
+
+    expect(onShow).toHaveBeenCalledTimes(2);
+
+    expect(onShow.mock.calls[0][0].tab).toBe(panels[1]);
+
+    expect(panels[1].hasAttribute("onshow")).toBe(false);
+  });
+
+  it("is called for the tab which replaced removed active one", () => {
+    const onShow = vi.fn();
+
+    const tabs = (keys: string[]) => (
+      <Tabs defaultIndex={2} onShow={onShow}>
+        {keys.map((key) => (
+          <Tab key={key} label={key}>
+            {key}
+          </Tab>
+        ))}
+      </Tabs>
+    );
+
+    const { rerender } = render(tabs(["a", "b", "c"]));
+
+    rerender(tabs(["a", "b"]));
+
+    expect(onShow.mock.calls.map(([detail]) => detail.button.textContent)).toEqual(["c", "b"]);
+
+    // tab before the active one removed: the same tab is still visible
+    rerender(tabs(["b"]));
+
+    expect(onShow).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("lazy", () => {
+  it("renders content of the tab when it is opened for the first time and keeps it later", () => {
+    const { container } = render(
+      <Tabs>
+        <Tab label="first">content of first</Tab>
+        <Tab label="second" lazy>
+          content of second
+        </Tab>
+      </Tabs>,
+    );
+
+    const { buttons, panels } = state(container);
+
+    expect(panels.map((p) => p.textContent)).toEqual(["content of first", ""]);
+
+    fireEvent.click(buttons[1]);
+
+    expect(panels[1].textContent).toBe("content of second");
+
+    fireEvent.click(buttons[0]);
+
+    expect(panels[1].textContent).toBe("content of second");
+
+    expect(panels[1].hasAttribute("lazy")).toBe(false);
+  });
+
+  it("renders initially active lazy tab straight away", () => {
+    const { container } = render(
+      <Tabs>
+        <Tab label="first" lazy>
+          content of first
+        </Tab>
+      </Tabs>,
+    );
+
+    expect(state(container).panels[0].textContent).toBe("content of first");
+  });
+});
+
+describe("keyboard", () => {
+  it("only active button is in the tab order (roving tabindex), arrows are not", () => {
+    const { container } = render(three({ defaultIndex: 1 }));
+
+    const { buttons, root } = state(container);
+
+    expect(buttons.map((b) => b.tabIndex)).toEqual([-1, 0, -1]);
+
+    fireEvent.click(buttons[2]);
+
+    expect(buttons.map((b) => b.tabIndex)).toEqual([-1, -1, 0]);
+
+    expect(Array.from(root.querySelectorAll<HTMLElement>("[data-vanilla-tabs-nav]")).map((b) => b.tabIndex)).toEqual([
+      -1, -1,
+    ]);
+  });
+
+  it("ArrowRight / ArrowLeft / Home / End open another tab and move focus, with wrapping", () => {
+    const onChange = vi.fn();
+
+    const { container } = render(three({ onChange }));
+
+    const { buttons } = state(container);
+
+    const press = (key: string) => fireEvent.keyDown(document.activeElement!, { key });
+
+    buttons[0].focus();
+
+    press("ArrowRight");
+
+    expect(state(container).activeButtons).toEqual([false, true, false]);
+
+    expect(document.activeElement).toBe(buttons[1]);
+
+    press("End");
+
+    expect(document.activeElement).toBe(buttons[2]);
+
+    press("ArrowRight");
+
+    expect(document.activeElement).toBe(buttons[0]);
+
+    press("ArrowLeft");
+
+    expect(state(container).activeButtons).toEqual([false, false, true]);
+
+    press("Home");
+
+    expect(state(container).activePanels).toEqual([true, false, false]);
+
+    expect(onChange.mock.calls.map(([index]) => index)).toEqual([1, 2, 0, 2, 0]);
+  });
+
+  it("ignores keys with modifiers and keys pressed inside of a label", () => {
+    const { container } = render(
+      <Tabs>
+        <Tab label={<input data-test="input" />}>1</Tab>
+        <Tab label="second">2</Tab>
+      </Tabs>,
+    );
+
+    fireEvent.keyDown(container.querySelector('[data-test="input"]')!, { key: "ArrowRight" });
+
+    fireEvent.keyDown(state(container).buttons[0], { key: "ArrowRight", ctrlKey: true });
+
+    expect(state(container).activeButtons).toEqual([true, false]);
+  });
+});
+
+describe("children", () => {
+  it("accepts tabs in fragments, arrays and behind conditions", () => {
+    const show = false;
+
+    const { container } = render(
+      <Tabs defaultIndex={3}>
+        <Tab label="a">A</Tab>
+        {show && <Tab label="hidden">hidden</Tab>}
+        <>
+          <Tab label="b">B</Tab>
+          <Fragment>
+            <Tab label="c">C</Tab>
+          </Fragment>
+        </>
+        {["d", "e"].map((name) => (
+          <Tab key={name} label={name}>
+            {name.toUpperCase()}
+          </Tab>
+        ))}
+      </Tabs>,
+    );
+
+    const { buttons, panels, activePanels } = state(container);
+
+    expect(buttons.map((b) => b.textContent)).toEqual(["a", "b", "c", "d", "e"]);
+
+    expect(panels.map((p) => p.textContent)).toEqual(["A", "B", "C", "D", "E"]);
+
+    expect(activePanels).toEqual([false, false, false, true, false]);
+  });
+});
+
+describe("unmountOnHide", () => {
+  it("renders content only while the tab is visible", () => {
+    const { container } = render(
+      <Tabs>
+        <Tab label="first">content of first</Tab>
+        <Tab label="second" unmountOnHide>
+          content of second
+        </Tab>
+      </Tabs>,
+    );
+
+    const { buttons, panels } = state(container);
+
+    expect(panels[1].textContent).toBe("");
+
+    fireEvent.click(buttons[1]);
+
+    expect(panels[1].textContent).toBe("content of second");
+
+    fireEvent.click(buttons[0]);
+
+    expect(panels[1].textContent).toBe("");
+
+    expect(panels[1].hasAttribute("unmountonhide")).toBe(false);
+  });
+});
+
+describe("DOM event", () => {
+  it("vanilla-tabs:change bubbles from the panel with the same detail as onShow", () => {
+    const details: { index: number; previousIndex: number; tab: Element }[] = [];
+
+    const listener = (e: Event) => details.push((e as CustomEvent).detail);
+
+    document.addEventListener("vanilla-tabs:change", listener);
+
+    const { container } = render(three());
+
+    const { buttons, panels } = state(container);
+
+    fireEvent.click(buttons[2]);
+
+    document.removeEventListener("vanilla-tabs:change", listener);
+
+    expect(details.map((d) => [d.previousIndex, d.index])).toEqual([
+      [-1, 0],
+      [0, 2],
+    ]);
+
+    expect(details[1].tab).toBe(panels[2]);
   });
 });

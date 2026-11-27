@@ -12,5 +12,5 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": ["skills/vanilla-tabs/vanilla-tabs.ts", "react", "test"]
+  "include": ["skills/vanilla-tabs", "demo", "test", "e2e", "playwright.config.ts"]
 }
